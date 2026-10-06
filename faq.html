@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="faq_page_title">الأسئلة الشائعة | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <script src="translations.js"></script>
+    <script src="i18n-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    
+    <style>
+        .faq-page-wrapper {
+            background: #F8FAFC;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .faq-premium-banner {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            padding: 120px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: -50px;
+        }
+
+        .faq-premium-banner::after {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--primary-orange) 0%, transparent 70%);
+            opacity: 0.15;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .faq-title {
+            font-size: clamp(36px, 5vw, 54px);
+            font-weight: 950;
+            margin-bottom: 15px;
+            
+        }
+
+        .category-nav {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px;
+            border-radius: 24px;
+            gap: 5px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin-top: 35px;
+        }
+
+        .faq-tab-btn {
+            padding: 14px 30px;
+            border-radius: 18px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6) !important;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-tab-btn:hover {
+            color: white !important;
+        }
+
+        .faq-tab-btn.active {
+            background: var(--primary-orange) !important;
+            color: white !important;
+            box-shadow: var(--shadow-orange);
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 20;
+            padding: 0 20px;
+        }
+
+        .premium-faq-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.02);
+        }
+
+        .premium-faq-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-orange-light);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .premium-faq-card.active {
+            border-color: var(--primary-orange);
+            box-shadow: 0 20px 40px -10px rgba(255, 63, 0, 0.08), var(--shadow-premium);
+        }
+
+        .faq-header-toggle {
+            padding: 30px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            gap: 20px;
+        }
+
+        .faq-header-toggle h3 {
+            font-size: 18px;
+            font-weight: 950;
+            color: var(--primary-black);
+            margin: 0;
+            transition: color 0.3s;
+        }
+
+        .premium-faq-card:hover .faq-header-toggle h3 {
+            color: var(--primary-orange);
+        }
+
+        .faq-toggle-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: rgba(255, 63, 0, 0.05);
+            color: var(--primary-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .premium-faq-card.active .faq-toggle-icon {
+            background: var(--primary-orange);
+            color: white;
+            transform: rotate(180deg);
+            box-shadow: var(--shadow-orange);
+        }
+
+        .faq-body-content {
+            padding: 0 35px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #475569;
+            line-height: 1.8;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .premium-faq-card.active .faq-body-content {
+            padding-bottom: 35px;
+            max-height: 500px;
+        }
+
+        .faq-group {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .help-cta-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 50px 40px;
+            text-align: center;
+            margin-top: 60px;
+            box-shadow: var(--shadow-premium);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .help-cta-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.1);
+        }
+
+        .help-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 63, 0, 0.08);
+            color: var(--primary-orange);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 32px;
+            transition: all 0.3s;
+        }
+
+        .help-cta-card:hover .help-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+            background: var(--primary-orange);
+            color: white;
+            box-shadow: var(--shadow-orange);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .faq-premium-banner { padding: 90px 20px; margin-bottom: -30px; }
+            .category-nav { display: flex; width: 100%; border-radius: 20px; }
+            .faq-tab-btn { flex: 1; justify-content: center; padding: 12px 15px; font-size: 14px; }
+            .faq-header-toggle { padding: 25px 20px; }
+            .faq-header-toggle h3 { font-size: 15px; }
+            .faq-body-content { padding: 0 20px; font-size: 14px; }
+            .premium-faq-card.active .faq-body-content { padding-bottom: 25px; }
+            .help-cta-card { padding: 35px 20px; }
+        }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <nav class="navbar"></nav>
+
+    <div class="faq-page-wrapper">
+        <header class="faq-premium-banner">
+            <div class="container">
+                <span style="font-weight: 900; color: var(--primary-orange); background: rgba(255, 63, 0, 0.1); padding: 8px 20px; border-radius: 50px; font-size: 14px; margin-bottom: 20px; display: inline-block; border: 1px solid rgba(255, 63, 0, 0.15);" data-i18n="support_center">مركز الدعم والمساعدة</span>
+                <h1 class="faq-title" data-i18n="faq_title">الأسئلة الشائعة</h1>
+                <p style="font-size: 18px; opacity: 0.8; max-width: 700px; margin: 0 auto; font-weight: 700;" data-i18n="faq_desc">كل ما تحتاج معرفته عن منصة lharfa.ma وكيفية البدء</p>
+                
+                <div class="category-nav">
+                    <button class="faq-tab-btn active" onclick="switchFAQ('client', this)" data-i18n="client_questions">
+                        <i data-lucide="user" style="width: 16px;"></i>
+                        <span>أسئلة الزبائن</span>
+                    </button>
+                    <button class="faq-tab-btn" onclick="switchFAQ('artisan', this)" data-i18n="artisan_questions">
+                        <i data-lucide="wrench" style="width: 16px;"></i>
+                        <span>أسئلة الحرفيين</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="faq-container">
+            <!-- Client FAQ Group -->
+            <div id="client-faq" class="faq-group">
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="faq_client_q1">هل الموقع مجاني للزبائن؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="faq_client_a1">
+                        نعم، استخدام الموقع للبحث عن الحرفيين والتواصل معهم مجاني تماماً للزبائن. أنت تدفع فقط ثمن الخدمة التي يقدمها الحرفي.
+                    </div>
+                </div>
+
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="faq_client_q2">كيف أتأكد من جودة عمل الحرفي؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="faq_client_a2">
+                        عند توفر البيانات، يمكنك الاطلاع على التقييمات المسجلة. تظهر شارة التوثيق للحسابات التي أكملت إجراءات التحقق.
+                    </div>
+                </div>
+
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="faq_client_q3">كيف يتم الدفع؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="faq_client_a3">
+                        الدفع يتم مباشرة للحرفي عند انتهاء العمل وبناءً على ما يتم الاتفاق عليه بينكما. المنصة لا تتدخل حالياً في عمليات الدفع المالي.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artisan FAQ Group -->
+            <div id="artisan-faq" class="faq-group" style="display: none;">
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="how_to_join">كيف أنضم كحرفي؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="join_desc">
+                        أنشئ ملفك المهني وأضف المعلومات التي تريد عرضها للزبائن.
+                    </div>
+                </div>
+
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="verification_terms">ما هي شروط التوثيق (Badge Verified)؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="verification_desc">
+                        يمكن تقديم وثائق الهوية وصور الأعمال للمراجعة عند تفعيل خدمة التوثيق.
+                    </div>
+                </div>
+
+                <div class="premium-faq-card">
+                    <div class="faq-header-toggle">
+                        <h3 data-i18n="premium_membership">كيف تعمل العضوية المميزة؟</h3>
+                        <div class="faq-toggle-icon"><i data-lucide="chevron-down"></i></div>
+                    </div>
+                    <div class="faq-body-content" data-i18n="premium_desc">
+                        تفاصيل العضوية ستظهر عند توفر بيانات الاشتراك وربط خدمة الدفع.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Need More Help CTA Card -->
+            <div class="help-cta-card">
+                <div class="help-icon-wrapper">
+                    <i data-lucide="help-circle" style="width: 36px; height: 36px;"></i>
+                </div>
+                <h3 style="font-size: 24px; font-weight: 950; color: var(--primary-black); margin-bottom: 12px;" data-i18n="still_have_questions">ما زال لديك استفسار؟</h3>
+                <p style="color: #64748B; font-weight: 700; line-height: 1.6; max-width: 500px; margin: 0 auto 30px;" data-i18n="contact_support_desc">إذا لم تجد إجابة لسؤالك في هذه الصفحة، يمكنك التواصل مع فريق الدعم الفني مباشرة.</p>
+                <a href="contact.html" style="display: inline-flex; align-items: center; gap: 10px; background: var(--primary-orange); color: white; border: none; padding: 16px 36px; border-radius: 20px; font-weight: 950; font-size: 16px; cursor: pointer; text-decoration: none; box-shadow: var(--shadow-orange); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                    <span data-i18n="contact_us">تواصل معنا</span>
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Container -->
+    <div class="footer-container"></div>
+
+    <script>
+        function switchFAQ(type, btn) {
+            document.querySelectorAll('.faq-group').forEach(el => el.style.display = 'none');
+            document.getElementById(`${type}-faq`).style.display = 'block';
+
+            document.querySelectorAll('.faq-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Auto open first FAQ in the switched category
+            const activeGroup = document.getElementById(`${type}-faq`);
+            document.querySelectorAll('.premium-faq-card').forEach(c => c.classList.remove('active'));
+            const firstCard = activeGroup.querySelector('.premium-faq-card');
+            if (firstCard) firstCard.classList.add('active');
+            
+            lucide.createIcons();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply updates
+            I18nManager.updateDOM();
+            lucide.createIcons();
+            
+            document.querySelectorAll('.faq-header-toggle').forEach(q => {
+                q.onclick = () => {
+                    const card = q.parentElement;
+                    const isOpen = card.classList.contains('active');
+                    
+                    document.querySelectorAll('.premium-faq-card').forEach(c => c.classList.remove('active'));
+                    
+                    if (!isOpen) {
+                        card.classList.add('active');
+                    }
+                }
+            });
+
+            // Initial state: Toggle first FAQ in client search
+            const firstFaq = document.querySelector('.premium-faq-card');
+            if (firstFaq) firstFaq.classList.add('active');
+        });
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

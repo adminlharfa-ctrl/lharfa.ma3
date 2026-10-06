@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="privacy_page_title">سياسة الخصوصية | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <script src="translations.js"></script>
+    <script src="i18n-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    <style>
+        .legal-page-wrapper {
+            background: #F8FAFC;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .legal-banner-premium {
+            background: linear-gradient(135deg, #05070A 0%, #0F172A 100%);
+            padding: 120px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Premium glow decorations in the header banner */
+        .legal-banner-premium::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 63, 0, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .legal-content-card {
+            background: white;
+            border-radius: 40px;
+            padding: 60px;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.05);
+        }
+
+        .legal-content-card h2 {
+            font-size: 24px;
+            font-weight: 900;
+            margin: 45px 0 25px;
+            color: #05070A;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1.5px solid #F1F5F9;
+            padding-bottom: 15px;
+        }
+
+        .legal-content-card h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .legal-content-card h2 i {
+            color: var(--primary-red, #FF3F00);
+            width: 24px;
+            height: 24px;
+        }
+
+        .legal-text-p {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .legal-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 35px 0;
+        }
+
+        .legal-list li {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        /* Adjustments for LTR / French */
+        html[dir="ltr"] .legal-list li {
+            padding-right: 0;
+            padding-left: 30px;
+        }
+
+        .legal-list li::before {
+            content: "✦";
+            color: var(--primary-red, #FF3F00);
+            font-size: 18px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            line-height: 1.9;
+        }
+
+        html[dir="ltr"] .legal-list li::before {
+            right: auto;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content-card {
+                padding: 35px 25px;
+                border-radius: 30px;
+            }
+
+            .legal-banner-premium {
+                padding: 90px 20px;
+            }
+
+            .legal-banner-premium h1 {
+                font-size: 34px !important;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body class="legal-page-wrapper">
+    <!-- Navbar Container filled by navbar.js -->
+    <nav class="navbar"></nav>
+
+    <header class="legal-banner-premium">
+        <div class="container">
+            <h1 style="font-size: 45px; font-weight: 950; margin-bottom: 15px; " data-i18n="privacy_title_main">سياسة الخصوصية</h1>
+            <p style="opacity: 0.85; font-weight: 800; font-size: 17px; max-width: 600px; margin: 0 auto;" data-i18n="privacy_subtitle">خصوصية بياناتكم هي أولويتنا القصوى في lharfa.ma</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="legal-content-card" id="privacy-content">
+            <!-- Section 1 -->
+            <h2 data-i18n="privacy_sec1"><i data-lucide="shield"></i> 1. البيانات التي نجمعها</h2>
+            <p class="legal-text-p" data-i18n="privacy_sec1_desc">
+                نقوم بجمع البيانات الضرورية فقط لضمان تواصل فعال بين الزبناء والحرفيين، وتشمل:
+            </p>
+            <ul class="legal-list">
+                <li data-i18n="privacy_sec1_li1">الاسم الكامل ومعلومات الاتصال (الهاتف والبريد الإلكتروني).</li>
+                <li data-i18n="privacy_sec1_li2">الموقع الجغرافي (على مستوى المدينة) لتوجيه الخدمة.</li>
+                <li data-i18n="privacy_sec1_li3">صور الأعمال (بالنسبة للحرفيين) ومعلومات التخصص.</li>
+            </ul>
+
+            <!-- Section 2 -->
+            <h2 data-i18n="privacy_sec2"><i data-lucide="activity"></i> 2. كيف نستخدم بياناتكم</h2>
+            <p class="legal-text-p" data-i18n="privacy_sec2_desc">
+                تستخدم البيانات للأغراض التالية:
+            </p>
+            <ul class="legal-list">
+                <li data-i18n="privacy_sec2_li1">تسهيل البحث والتواصل المباشر عبر رسائل المنصة.</li>
+                <li data-i18n="privacy_sec2_li2">تحسين جودة الخدمات المقدمة وبناء الثقة عبر التقييمات.</li>
+                <li data-i18n="privacy_sec2_li3">إرسال تنبيهات بخصوص الرسائل والتحديثات.</li>
+            </ul>
+
+            <!-- Section 3 -->
+            <h2 data-i18n="privacy_sec3"><i data-lucide="lock"></i> 3. حماية البيانات</h2>
+            <p class="legal-text-p" data-i18n="privacy_sec3_desc">
+                نحن نستخدم تقنيات متطورة لتشفير وحماية بياناتكم من أي وصول غير مصرح به. لا نقوم إطلاقاً ببيع بياناتكم الشخصية لأطراف ثالثة لأغراض تسويقية.
+            </p>
+
+            <!-- Section 4 -->
+            <h2 data-i18n="privacy_sec4"><i data-lucide="share-2"></i> 4. مشاركة المعلومات</h2>
+            <p class="legal-text-p" data-i18n="privacy_sec4_desc">
+                تتم المراسلات بين الزبون والحرفي عبر الرسائل داخل المنصة، ولا تتم مشاركة أرقام الهاتف تلقائياً.
+            </p>
+
+            <!-- Section 5 -->
+            <h2 data-i18n="privacy_sec5"><i data-lucide="mail"></i> 5. اتصل بنا</h2>
+            <p class="legal-text-p" data-i18n="privacy_sec5_desc">
+                إذا كان لديك أي سؤال بخصوص خصوصية بياناتك، يمكنك التواصل معنا عبر صفحة الاتصال أو البريد الإلكتروني المخصص.
+            </p>
+        </div>
+
+        <!-- Back to Home Premium CTA -->
+        <div class="back-home-wrapper" style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="btn-elite-subscribe" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; padding: 15px 35px;">
+                <i data-lucide="home"></i>
+                <span data-i18n="btn_back_home">العودة للرئيسية</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer Container filled by footer.js -->
+    <div class="footer-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply current language translations
+            if (window.I18nManager) {
+                window.I18nManager.updateDOM();
+            }
+            // Initialize Lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

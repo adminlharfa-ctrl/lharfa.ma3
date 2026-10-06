@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="product_detail_page_title">تفاصيل المنتج | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <script src="translations.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="i18n-manager.js"></script>
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    <script>
+        // Check Access: Only for Artisans (as requested by existing code)
+        document.addEventListener('DOMContentLoaded', () => {
+            const authUser = JSON.parse(localStorage.getItem('albane_user') || 'null');
+            const authToken = localStorage.getItem('albane_token') || sessionStorage.getItem('albane_token');
+            if (!authUser || !authToken || authUser.role !== 'artisan') {
+                const msg = I18nManager.getString('artisan_only_shop') || 'عذراً، هذا القسم خاص بالحرفيين فقط.';
+                alert(msg);
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+    <style>
+        .product-page-wrapper {
+            background: #F8FAFC;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .product-detail-grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .media-showcase-premium {
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--shadow-premium);
+            position: sticky;
+            top: 100px;
+        }
+
+        .main-img-box {
+            width: 100%;
+            height: 500px;
+            border-radius: 30px;
+            overflow: hidden;
+            background: #F8FAFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-img-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .product-info-premium {
+            padding: 20px 0;
+        }
+
+        .category-tag-premium {
+            display: inline-block;
+            background: var(--primary-orange-light);
+            color: var(--primary-orange);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 950;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .product-title-huge {
+            font-size: 42px;
+            font-weight: 950;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .brand-verified-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .price-box-premium {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border-color);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .price-val-huge {
+            font-size: 48px;
+            font-weight: 950;
+            color: var(--primary-orange);
+        }
+
+        .btn-action-huge {
+            height: 70px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 950;
+        }
+
+        .spec-card-premium {
+            background: #fdfdfd;
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid #f1f1f1;
+        }
+
+        .spec-item-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .spec-item-row:last-child { border: none; }
+        .spec-item-row i { color: var(--primary-orange); width: 22px; }
+
+        @media (max-width: 1024px) {
+            .product-detail-grid { grid-template-columns: 1fr; gap: 40px; }
+            .media-showcase-premium { position: static; }
+        }
+        @media (max-width: 480px) {
+            .product-title-huge { font-size: 32px; }
+            .main-img-box { height: 350px; }
+            .price-val-huge { font-size: 38px; }
+            .btn-stack { flex-direction: column; }
+            .btn-stack button { width: 100% !important; }
+            .price-box-premium { padding: 25px; border-radius: 25px; }
+        }
+    
+        /* Professional mobile product-detail polish */
+        .product-page-wrapper main.container > a:hover {
+            transform: translateX(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .product-page-wrapper {
+                background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%) !important;
+                padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+
+            .product-page-wrapper main.container {
+                padding-inline: 12px !important;
+            }
+
+            .product-page-wrapper main.container > a {
+                margin-top: 16px !important;
+                min-height: 42px !important;
+                padding: 0 14px !important;
+                border-radius: 14px !important;
+                background: white !important;
+                border: 1px solid rgba(15, 23, 42, 0.07) !important;
+                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+                text-decoration: none !important;
+            }
+
+            .product-detail-grid {
+                margin-top: 16px !important;
+                gap: 16px !important;
+            }
+
+            .media-showcase-premium {
+                padding: 10px !important;
+                border-radius: 22px !important;
+                box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09) !important;
+            }
+
+            .main-img-box {
+                height: 255px !important;
+                border-radius: 18px !important;
+                padding: 20px !important;
+            }
+
+            .product-info-premium {
+                padding: 0 !important;
+            }
+
+            .category-tag-premium {
+                font-size: 11px !important;
+                padding: 7px 13px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .product-title-huge {
+                font-size: clamp(24px, 7vw, 32px) !important;
+                line-height: 1.18 !important;
+                margin-bottom: 10px !important;
+            }
+
+            .brand-verified-badge {
+                gap: 8px !important;
+                font-size: 13px !important;
+                margin-bottom: 14px !important;
+                padding: 10px 12px !important;
+                border-radius: 14px !important;
+                background: rgba(16, 185, 129, 0.08) !important;
+                color: #334155 !important;
+            }
+
+            .price-box-premium {
+                padding: 18px 16px !important;
+                border-radius: 20px !important;
+                margin-bottom: 14px !important;
+                box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
+            }
+
+            .price-box-premium > div:first-child {
+                font-size: 11px !important;
+                margin-bottom: 6px !important;
+            }
+
+            .price-val-huge {
+                font-size: 34px !important;
+                line-height: 1 !important;
+            }
+
+            .price-val-huge span {
+                font-size: 16px !important;
+            }
+
+            .price-box-premium p {
+                font-size: 13px !important;
+                line-height: 1.55 !important;
+                margin-top: 12px !important;
+            }
+
+            .btn-stack {
+                position: sticky !important;
+                bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+                z-index: 15000 !important;
+                display: grid !important;
+                grid-template-columns: 1fr 54px !important;
+                gap: 10px !important;
+                padding: 10px !important;
+                margin-inline: -4px !important;
+                border-radius: 20px !important;
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(18px) !important;
+                -webkit-backdrop-filter: blur(18px) !important;
+                box-shadow: 0 18px 48px rgba(15, 23, 42, 0.14) !important;
+                border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            }
+
+            .btn-stack button {
+                width: 100% !important;
+                height: 52px !important;
+                min-height: 52px !important;
+                border-radius: 15px !important;
+                font-size: 14px !important;
+                white-space: normal !important;
+            }
+
+            .btn-stack .btn-outline {
+                width: 54px !important;
+                min-width: 54px !important;
+                padding: 0 !important;
+            }
+
+            .spec-card-premium {
+                margin-top: 14px !important;
+                padding: 18px 16px !important;
+                border-radius: 20px !important;
+                background: white !important;
+                box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06) !important;
+            }
+
+            .spec-card-premium h3 {
+                font-size: 16px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .spec-item-row {
+                padding: 11px 0 !important;
+                gap: 10px !important;
+                font-size: 13px !important;
+                line-height: 1.45 !important;
+            }
+
+            .spec-item-row i {
+                width: 18px !important;
+                height: 18px !important;
+                flex: 0 0 18px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .main-img-box { height: 220px !important; }
+            .btn-stack { grid-template-columns: 1fr 48px !important; }
+            .btn-stack .btn-outline { width: 48px !important; min-width: 48px !important; }
+        }</style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body class="product-page-wrapper">
+    <nav class="navbar"></nav>
+
+    <main class="container">
+        <a href="shop.html" style="display: inline-flex; align-items: center; gap: 10px; margin-top: 30px; font-weight: 900; color: var(--primary-orange); transition: 0.3s; padding: 10px 0;">
+            <i data-lucide="arrow-right"></i> <span data-i18n="back_to_shop">العودة للمتجر</span>
+        </a>
+
+        <div id="productDetail" class="product-detail-grid">
+            <!-- Loading -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 120px 0;">
+                <div class="loader" style="margin: 0 auto 30px;"></div>
+                <p style="font-weight: 900; color: var(--text-muted);" data-i18n="loading_product">جاري تحميل تفاصيل المنتج...</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="footer-container"></div>
+    <div id="toastContainer"></div>
+
+    <script>
+        async function loadProduct() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) { window.location.href = 'shop.html'; return; }
+
+            const resp = await api.getToolById(id);
+            const grid = document.getElementById('productDetail');
+
+            if (resp.success && resp.data) {
+                const p = resp.data;
+                const strings = window.translations[localStorage.getItem('albane_lang') || 'ar'];
+                
+                grid.innerHTML = `
+                    <div class="media-showcase-premium">
+                        <div class="main-img-box">
+                            <img src="${p.image}" alt="${p.name}">
+                        </div>
+                    </div>
+                    <div class="product-info-premium">
+                        <span class="category-tag-premium">${p.categoryLabel || ''}</span>
+                        <h1 class="product-title-huge">${p.name}</h1>
+                        ${p.brand ? `<div class="brand-verified-badge"><span>العلامة التجارية: <strong>${p.brand}</strong></span></div>` : ''}
+                        
+                        <div class="price-box-premium">
+                            <div style="font-size: 14px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">${strings.price_label || 'السعر'}</div>
+                            <div class="price-val-huge">${p.price} <span style="font-size: 22px;">DH</span></div>
+                            <p style="margin-top: 15px; font-size: 15px; color: var(--text-muted); font-weight: 700; line-height: 1.7;">
+                                ${p.description || strings.product_generic_desc}
+                            </p>
+                        </div>
+
+                        <div class="btn-stack" style="display: flex; gap: 20px;">
+                            <button class="btn btn-primary btn-action-huge flex-1" onclick="handleOrderAction('${p.name}')">
+                                <i data-lucide="shopping-cart"></i> ${strings.order_now_whatsapp}
+                            </button>
+                            <button class="btn btn-outline" style="width: 70px; border-radius: 20px;" onclick="handleShare('${p.name}')">
+                                <i data-lucide="share-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="spec-card-premium">
+                            <h3 style="font-weight: 950; margin-bottom: 20px; font-size: 18px;">${strings.technical_specs}</h3>
+                            ${p.spec ? `<div class="spec-item-row"><i data-lucide="settings"></i> <span>${p.spec}</span></div>` : '<p>لا توجد مواصفات إضافية متاحة.</p>'}
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            } else {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; background: white; border-radius: 28px; padding: 50px 25px; text-align: center; box-shadow: var(--shadow-premium);">
+                        <i data-lucide="package-x" style="width: 54px; height: 54px; color: var(--primary-orange); margin-bottom: 18px;"></i>
+                        <h1 style="font-size: 28px; font-weight: 950; color: var(--text-dark); margin-bottom: 10px;">المنتج غير موجود</h1>
+                        <p style="color: var(--text-muted); font-weight: 700; margin-bottom: 24px;">ربما تم حذف هذا المنتج أو الرابط غير صحيح.</p>
+                        <a href="shop.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border-radius: 16px; text-decoration: none; font-weight: 950;">
+                            <i data-lucide="arrow-right"></i> الرجوع للمتجر
+                        </a>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function handleOrderAction(name) {
+            const phone = "212783086770";
+            const msg = encodeURIComponent(`السلام عليكم، أريد طلب هذا المنتج: *${name}* من متجر lharfa.ma`);
+            window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        }
+
+        function handleShare(name) {
+            if (navigator.share) navigator.share({ title: name, url: window.location.href });
+        }
+
+        window.onload = loadProduct;
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

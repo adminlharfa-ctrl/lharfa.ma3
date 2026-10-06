@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="terms_page_title">الشروط والأحكام | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <script src="translations.js"></script>
+    <script src="i18n-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    <style>
+        .legal-page-wrapper {
+            background: #F8FAFC;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .legal-banner-premium {
+            background: linear-gradient(135deg, #05070A 0%, #0F172A 100%);
+            padding: 120px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Premium glow decorations in the header banner */
+        .legal-banner-premium::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 63, 0, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .legal-content-card {
+            background: white;
+            border-radius: 40px;
+            padding: 60px;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.05);
+        }
+
+        .legal-content-card h2 {
+            font-size: 24px;
+            font-weight: 900;
+            margin: 45px 0 25px;
+            color: #05070A;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1.5px solid #F1F5F9;
+            padding-bottom: 15px;
+        }
+
+        .legal-content-card h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .legal-content-card h2 i {
+            color: var(--primary-red, #FF3F00);
+            width: 24px;
+            height: 24px;
+        }
+
+        .legal-text-p {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .legal-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 35px 0;
+        }
+
+        .legal-list li {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        /* Adjustments for LTR / French */
+        html[dir="ltr"] .legal-list li {
+            padding-right: 0;
+            padding-left: 30px;
+        }
+
+        .legal-list li::before {
+            content: "✦";
+            color: var(--primary-red, #FF3F00);
+            font-size: 18px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            line-height: 1.9;
+        }
+
+        html[dir="ltr"] .legal-list li::before {
+            right: auto;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content-card {
+                padding: 35px 25px;
+                border-radius: 30px;
+            }
+
+            .legal-banner-premium {
+                padding: 90px 20px;
+            }
+
+            .legal-banner-premium h1 {
+                font-size: 34px !important;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body class="legal-page-wrapper">
+    <!-- Navbar Container filled by navbar.js -->
+    <nav class="navbar"></nav>
+
+    <header class="legal-banner-premium">
+        <div class="container">
+            <h1 style="font-size: 45px; font-weight: 950; margin-bottom: 15px; " data-i18n="terms_title_main">الشروط والأحكام</h1>
+            <p style="opacity: 0.85; font-weight: 800; font-size: 17px; max-width: 600px; margin: 0 auto;" data-i18n="terms_subtitle">يرجى القراءة بعناية لضمان أفضل تجربة في منصة حرفة</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="legal-content-card" id="terms-content">
+            <!-- Section 1 -->
+            <h2 data-i18n="terms_sec1"><i data-lucide="info"></i> 1. مقدمة</h2>
+            <p class="legal-text-p" data-i18n="terms_sec1_desc">
+                مرحباً بكم في lharfa.ma، المنصة التي تربط بين أصحاب المنازل والحرفيين المهرة. باستخدامك لمنصتنا، فإنك توافق على الالتزام بالشروط والأحكام التالية.
+            </p>
+
+            <!-- Section 2 -->
+            <h2 data-i18n="terms_sec2"><i data-lucide="briefcase"></i> 2. دور المنصة</h2>
+            <p class="legal-text-p" data-i18n="terms_sec2_desc">
+                lharfa.ma هي منصة وسيطة تتيح البحث والتواصل المباشر عبر الرسائل داخل المنصة، ولا تنشئ طلبات حجز أو تكون طرفاً في الاتفاق بين الزبون والحرفي.
+            </p>
+            <ul class="legal-list">
+                <li data-i18n="terms_sec2_li1">المنصة لا تتحمل مسؤولية جودة العمل النهائية.</li>
+                <li data-i18n="terms_sec2_li2">المناقشات المادية تتم مباشرة بين الطرفين.</li>
+                <li data-i18n="terms_sec2_li3">نحن نقوم بتوثيق الحسابات بناءً على بيانات الهوية، لكننا لا نضمن السلوك الشخصي.</li>
+            </ul>
+
+            <!-- Section 3 -->
+            <h2 data-i18n="terms_sec3"><i data-lucide="user-check"></i> 3. التزامات الحرفي</h2>
+            <ul class="legal-list">
+                <li data-i18n="terms_sec3_li1">الالتزام بتقديم معلومات حقيقية وصور واقعية للأعمال السابقة.</li>
+                <li data-i18n="terms_sec3_li2">الاحترام التام للمواعيد المتفق عليها مع الزبناء.</li>
+                <li data-i18n="terms_sec3_li3">تقديم الخدمة بكل أمانة واحترافية.</li>
+            </ul>
+
+            <!-- Section 4 -->
+            <h2 data-i18n="terms_sec4"><i data-lucide="users"></i> 4. التزامات الزبون</h2>
+            <ul class="legal-list">
+                <li data-i18n="terms_sec4_li1">تقديم وصف دقيق للخدمة المطلوبة.</li>
+                <li data-i18n="terms_sec4_li2">توفير بيئة عمل آمنة ومناسبة للحرفي.</li>
+                <li data-i18n="terms_sec4_li3">دفع المبلغ المتفق عليه فور انتهاء الخدمة.</li>
+            </ul>
+
+            <!-- Section 5 -->
+            <h2 data-i18n="terms_sec5"><i data-lucide="scale"></i> 5. فض النزاعات</h2>
+            <p class="legal-text-p" data-i18n="terms_sec5_desc">
+                في حالة وقوع خلاف، نشجع الطرفين على الحل الودي. في الحالات المستعصية، يمكن التواصل مع إدارة المنصة للوساطة أو تجميد حساب الطرف المخل بالقوانين.
+            </p>
+        </div>
+
+        <!-- Back to Home Premium CTA -->
+        <div class="back-home-wrapper" style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="btn-elite-subscribe" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; padding: 15px 35px;">
+                <i data-lucide="home"></i>
+                <span data-i18n="btn_back_home">العودة للرئيسية</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer Container filled by footer.js -->
+    <div class="footer-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply current language translations
+            if (window.I18nManager) {
+                window.I18nManager.updateDOM();
+            }
+            // Initialize Lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="artisan_profile_page_title">الملف الشخصي المهني | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="translations.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="i18n-manager.js"></script>
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    <style>
+        /* ELITE PROFILE DESIGN SYSTEM */
+        :root {
+            --profile-bg: #F8FAFC;
+        }
+
+        .profile-page-root {
+            background: var(--profile-bg);
+            min-height: 100vh;
+        }
+
+        /* Royal Hero Header */
+        .profile-hero {
+            background: #05070A;
+            padding: 120px 0 180px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(circle, var(--primary-red-glow) 0%, transparent 70%);
+            filter: blur(100px);
+            opacity: 0.5;
+        }
+
+        .artisan-header-container {
+            display: flex;
+            gap: 60px;
+            align-items: flex-end;
+            margin-top: -100px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .artisan-avatar-card {
+            background: white;
+            padding: 12px;
+            border-radius: 50px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+            transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .artisan-avatar-card:hover {
+            transform: translateY(-15px) rotate(-3deg);
+            box-shadow: 0 40px 80px rgba(255, 63, 0, 0.15);
+        }
+
+        .artisan-avatar-img {
+            width: 280px;
+            height: 280px;
+            border-radius: 42px;
+            object-fit: cover;
+            display: block;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .artisan-identity-group {
+            flex: 1;
+            padding-bottom: 30px;
+        }
+
+        .artisan-name-title {
+            font-size: 64px;
+            font-weight: 950;
+            margin-bottom: 15px;
+            color: white;
+            
+            line-height: 1;
+        }
+
+        .badge-verified-elite {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            padding: 12px 28px;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 950;
+            margin-bottom: 25px;
+            border: 1.5px solid rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(15px);
+        }
+
+        .badge-premium-elite {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 950;
+            margin-bottom: 25px;
+            margin-inline-end: 20px;
+            box-shadow: 0 10px 25px rgba(184, 134, 11, 0.3);
+        }
+
+        .meta-strip {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 19px;
+            font-weight: 800;
+            color: #CBD5E1;
+        }
+
+        .meta-tag i {
+            color: var(--primary-red);
+        }
+
+        /* Content Grid */
+        .profile-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 60px;
+            margin-top: 100px;
+            padding-bottom: 120px;
+        }
+
+        .profile-section-card {
+            background: white;
+            border-radius: 48px;
+            padding: 50px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+            transition: 0.4s;
+        }
+
+        .profile-section-card:hover {
+            border-color: rgba(255, 63, 0, 0.1);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-section-title {
+            font-size: 28px;
+            font-weight: 950;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: #0F172A;
+            
+        }
+
+        .profile-section-title i {
+            color: var(--primary-red);
+            width: 28px;
+        }
+
+        /* Sidebar Action */
+        .artisan-action-sticky {
+            position: sticky;
+            top: 120px;
+            background: white;
+            border-radius: 50px;
+            padding: 50px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .artisan-action-sticky:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-red-glow);
+        }
+
+        .action-status-box {
+            background: #F0FDF4;
+            padding: 15px;
+            border-radius: 100px;
+            margin-bottom: 35px;
+            border: 1.5px solid #DCFCE7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #16A34A;
+            font-weight: 900;
+        }
+
+        .btn-action-premium {
+            height: 75px;
+            border-radius: 22px;
+            font-size: 19px;
+            font-weight: 950;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            transition: 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary-red {
+            background: var(--grad-red);
+            color: white;
+            box-shadow: 0 15px 35px rgba(255, 63, 0, 0.25);
+        }
+
+        .btn-primary-red:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 50px rgba(255, 63, 0, 0.35);
+        }
+
+        .btn-outline-elite {
+            background: #F8FAFC;
+            color: #475569;
+            border: 2px solid #E2E8F0;
+            margin-top: 15px;
+        }
+
+        .btn-outline-elite:hover {
+            background: white;
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        /* Portfolio */
+        .portfolio-item-elite {
+            border-radius: 35px;
+            overflow: hidden;
+            height: 250px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .portfolio-item-elite img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portfolio-item-elite:hover img {
+            transform: scale(1.15) rotate(2deg);
+        }
+
+        /* Reviews */
+        .review-card-elite {
+            padding: 35px 0;
+            border-bottom: 2px solid #F1F5F9;
+        }
+
+        .review-card-elite:last-child {
+            border-bottom: none;
+        }
+
+        /* Mobile Action Bar */
+        @media (max-width: 1024px) {
+            .profile-content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .artisan-header-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 30px;
+            }
+
+            .artisan-action-sticky {
+                display: none !important;
+            }
+
+            .mobile-action-bar {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(25px);
+                padding: 15px 20px;
+                border-top: 1px solid rgba(0, 0, 0, 0.08);
+                z-index: 2000;
+                gap: 12px;
+                box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.1);
+                animation: slideUpBar 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes slideUpBar {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+
+            .mobile-action-bar .btn-action-premium {
+                height: 60px;
+                font-size: 15px;
+                flex: 1;
+                margin: 0 !important;
+            }
+
+            .artisan-name-title {
+                font-size: 42px;
+                
+            }
+
+            .profile-page-root {
+                padding-bottom: 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-hero {
+                padding: 80px 0 120px;
+            }
+
+            .artisan-avatar-img {
+                width: 130px;
+                height: 130px;
+            }
+
+            .artisan-header-container {
+                margin-top: -70px;
+            }
+
+            .artisan-name-title {
+                font-size: 32px;
+                line-height: 1.2;
+            }
+
+            .profile-section-card {
+                padding: 25px 20px;
+                border-radius: 25px;
+                margin-bottom: 25px;
+            }
+
+            .profile-section-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .meta-strip {
+                gap: 12px;
+            }
+
+            .meta-tag {
+                font-size: 15px;
+            }
+
+            .portfolio-grid-premium {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 12px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-grid-premium {
+                grid-template-columns: 1fr !important;
+            }
+
+            .artisan-name-title {
+                font-size: 28px;
+            }
+
+            .badge-verified-elite,
+            .badge-premium-elite {
+                padding: 8px 15px;
+                font-size: 11px;
+                margin-bottom: 8px;
+                margin-inline-end: 0;
+            }
+
+            .meta-tag {
+                font-size: 14px;
+                gap: 8px;
+            }
+
+        }
+
+        /* Elite Modal Styles */
+        .modal-content-elite {
+            background: white;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 550px;
+            padding: 40px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.15);
+            position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 20px;
+        }
+
+        .close-modal-btn {
+            background: #F1F5F9;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close-modal-btn:hover {
+            background: #FEE2E2;
+            color: var(--primary-red);
+            transform: rotate(90deg);
+        }
+
+        .form-group-elite {
+            margin-bottom: 20px;
+        }
+
+        .modal-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .modal-label i {
+            width: 18px;
+            color: var(--primary-red);
+        }
+
+        .modal-input {
+            width: 100%;
+            background: #F8FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            transition: 0.3s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .modal-input:focus {
+            background: white;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 4px rgba(255, 63, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content-elite {
+                padding: 25px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body class="profile-page-root">
+    <nav class="navbar"></nav>
+
+    <!-- Elite Hero Header -->
+    <!-- Royal Hero Header -->
+    <header class="profile-hero">
+        <div class="container">
+            <div class="artisan-header-container">
+                <div class="artisan-avatar-card">
+                    <img id="pAvatar" src="logo1.png" alt="صورة الحرفي" class="artisan-avatar-img">
+                </div>
+                <div class="artisan-identity-group">
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <div class="badge-verified-elite" id="pVerifiedBadge" style="display: none;">
+                            <i data-lucide="shield-check"></i> <span data-i18n="verified_pro">حرفي موثق</span>
+                        </div>
+                        <div class="badge-premium-elite" id="pEliteBadge" style="display: none;">
+                            <i data-lucide="crown"></i> <span data-i18n="elite_pro">حرفي Elite</span>
+                        </div>
+                    </div>
+                    <h1 class="artisan-name-title" id="pName">...</h1>
+                    <div class="meta-strip">
+                        <div class="meta-tag"><i data-lucide="map-pin"></i> <span id="pLocation">...</span></div>
+                        <div class="meta-tag"><i data-lucide="wrench"></i> <span id="pSpecialty">...</span></div>
+                        <div class="meta-tag" id="pRatingWrap" style="display: none;"><i data-lucide="star" style="color: #F59E0B; fill: #F59E0B;"></i> <span
+                            id="pRating">--</span></div>
+                        <div class="meta-tag" id="pExperienceWrap" style="display: none;"><i data-lucide="award"></i> <span id="pExperience"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container profile-content-grid">
+        <!-- Main Content -->
+        <div class="profile-details-main">
+            <div class="profile-section-card">
+                <h2 class="profile-section-title"><i data-lucide="user"></i> <span data-i18n="professional_bio">النبذة
+                        المهنية</span></h2>
+                <p id="pBio" style="font-size: 18px; line-height: 2; color: #475569; font-weight: 700;">...</p>
+            </div>
+
+            <div class="profile-section-card">
+                <h2 class="profile-section-title"><i data-lucide="camera"></i> <span data-i18n="portfolio">معرض الأعمال
+                        المنجزة</span></h2>
+                <div class="portfolio-grid-premium" id="pGallery"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;">
+                    <!-- Gallery items loaded via JS -->
+                </div>
+            </div>
+
+            <div class="profile-section-card">
+                <h2 class="profile-section-title"><i data-lucide="message-square"></i> <span data-i18n="reviews">آراء
+                        الزبناء</span></h2>
+                <div id="pReviews">
+                    <!-- Reviews list loaded via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <aside>
+            <div class="artisan-action-sticky">
+                <div class="action-status-box" id="artisanAvailabilityStatus" style="background: #F8FAFC; color: #64748B; border-color: #E2E8F0;">
+                    <span
+                        style="width: 12px; height: 12px; background: #94A3B8; border-radius: 50%; display: inline-block;"></span>
+                    <span id="artisanAvailabilityLabel">التوفر غير محدد</span>
+                </div>
+
+                <div class="action-btns-stack">
+                    <button class="btn-action-premium btn-primary-red" onclick="openChatSession()">
+                        <i data-lucide="message-square"></i> <span>تواصل مع الحرفي</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal-overlay">
+        <div class="modal-content-elite">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-size: 24px; font-weight: 950; color: #0F172A; margin-bottom: 5px;">إرسال رسالة
+                        مباشرة</h2>
+                    <p style="color: #64748B; font-weight: 700;">تواصل مع الحرفي للاستفسار عن خدماته</p>
+                </div>
+                <button onclick="closeMessageModal()" class="close-modal-btn"><i data-lucide="x"></i></button>
+            </div>
+
+            <form id="messageForm" class="modal-body-elite">
+                <div class="form-group-elite">
+                    <label class="modal-label"><i data-lucide="user"></i> اسمك الكامل</label>
+                    <input type="text" id="senderName" class="modal-input" placeholder="أدخل اسمك..." required>
+                </div>
+
+                <div class="form-group-elite">
+                    <label class="modal-label"><i data-lucide="message-circle"></i> نص الرسالة</label>
+                    <textarea id="messageContent" class="modal-input"
+                        style="height: 150px; padding-top: 15px; resize: none;" placeholder="اكتب استفسارك هنا..."
+                        required></textarea>
+                </div>
+
+                <button type="submit" class="btn-action-premium btn-primary-red" style="width: 100%; margin-top: 10px;">
+                    <i data-lucide="send"></i> إرسال الرسالة الآن
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Floating Action Bar -->
+    <div class="mobile-action-bar" style="display: none;">
+        <button class="btn-action-premium btn-primary-red" onclick="openChatSession()">
+            <i data-lucide="message-square" style="width: 20px;"></i> <span>تواصل مع الحرفي</span>
+        </button>
+    </div>
+
+    <div class="footer-container"></div>
+    <div id="toastContainer"></div>
+
+    <script>
+        function t(key) {
+            if (window.I18nManager && typeof window.I18nManager.getString === 'function') {
+                return window.I18nManager.getString(key);
+            }
+            const lang = localStorage.getItem('albane_lang') || 'ar';
+            return (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
+        }
+
+        async function loadProfile() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            if (currentUser.name) {
+                const nameInput = document.getElementById('senderName');
+                if (nameInput) {
+                    nameInput.value = currentUser.name;
+                    nameInput.readOnly = true;
+                    nameInput.style.opacity = '0.7';
+                }
+            }
+
+            if (!id && currentUser.role !== 'artisan') {
+                window.location.href = 'artisans.html';
+                return;
+            }
+
+            let a = null;
+
+            try {
+                const resp = id ? await api.getArtisanById(id) : { success: false };
+                if (resp.success) a = resp.data;
+            } catch (e) {
+                console.warn('Unable to load artisan profile', e);
+            }
+
+            if ((!a || !a.success) && currentUser.role === 'artisan' && (!id || id === 'me')) {
+                a = { ...currentUser, category: currentUser.specialty, portfolio: currentUser.gallery || [] };
+            }
+
+            if (!a) {
+                document.getElementById('pName').textContent = 'الملف غير متاح';
+                document.getElementById('pLocation').textContent = '';
+                document.getElementById('pSpecialty').textContent = '';
+                document.getElementById('pBio').textContent = 'لم يتم العثور على بيانات لهذا الحرفي.';
+                document.querySelector('.artisan-action-sticky').style.display = 'none';
+                renderGallery([]);
+                document.getElementById('pReviews').textContent = 'لا توجد تقييمات متاحة.';
+                return;
+            }
+
+            window.currentProfileArtisan = a;
+            document.getElementById('pName').textContent = a.name || 'غير متاح';
+            if (a.avatar) document.getElementById('pAvatar').src = a.avatar;
+            else document.getElementById('pAvatar').removeAttribute('src');
+            document.getElementById('pLocation').textContent = a.cityLabel || a.city || 'غير متاح';
+            document.getElementById('pSpecialty').textContent = a.category ? (t(a.category) || a.category) : 'غير متاح';
+            if (Number.isFinite(Number(a.experience)) && a.experience !== '') {
+                document.getElementById('pExperience').textContent = `${a.experience} ${t('years_exp') || 'سنوات خبرة'}`;
+                document.getElementById('pExperienceWrap').style.display = 'flex';
+            }
+            document.getElementById('pBio').textContent = a.bio || 'لا توجد نبذة مهنية متاحة.';
+            if (Number.isFinite(Number(a.rating)) && Number(a.rating) > 0) {
+                document.getElementById('pRating').textContent = a.reviews ? `${a.rating} (${a.reviews} تقييم)` : String(a.rating);
+                document.getElementById('pRatingWrap').style.display = 'flex';
+            }
+
+            if (a.verified === true) document.getElementById('pVerifiedBadge').style.display = 'inline-flex';
+            if (a.isElite === true) document.getElementById('pEliteBadge').style.display = 'inline-flex';
+            if (a.available === true) {
+                const availability = document.getElementById('artisanAvailabilityStatus');
+                availability.style.background = '#F0FDF4';
+                availability.style.color = '#16A34A';
+                availability.style.borderColor = '#BBF7D0';
+                availability.querySelector('span').style.background = '#10B981';
+                document.getElementById('artisanAvailabilityLabel').textContent = 'متاح للطلبات الآن';
+            }
+
+            renderGallery(a.portfolio);
+            renderReviews();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderGallery(images) {
+            const grid = document.getElementById('pGallery');
+            const list = images && images.length ? images : [];
+            grid.innerHTML = list.map((img) => '<div class="portfolio-item-elite"><img src="' + img + '" loading="lazy"></div>').join('')
+                || '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: #94A3B8; font-weight: 800;">لا توجد أعمال متاحة للعرض حالياً.</div>';
+        }
+
+        async function renderReviews() {
+            const list = document.getElementById('pReviews');
+            const artisan = window.currentProfileArtisan || {};
+            const res = window.api ? await api.getReviews(artisan.id) : { success: true, data: [] };
+            const reviews = res.success ? (res.data || []) : [];
+            list.innerHTML = reviews.map((r) => {
+                const name = r.client || r.client_name || 'مستخدم';
+                const rating = Number(r.rating);
+                const stars = Number.isFinite(rating) && rating > 0
+                    ? Array(Math.min(5, Math.floor(rating))).fill('<i data-lucide="star" style="width: 14px; fill: #F59E0B;"></i>').join('')
+                    : '';
+                return '<div class="review-card-elite">'
+                    + '<div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">'
+                    + '<h4 style="font-weight: 900; font-size: 18px; color: #1E293B;">' + name + '</h4>'
+                    + '<span style="font-size: 13px; color: #94A3B8; font-weight: 800;">' + (r.created_at ? r.created_at.slice(0, 10) : '') + '</span></div>'
+                    + (stars ? '<div style="color: #F59E0B; margin-bottom: 15px; display: flex; gap: 4px;">' + stars + '</div>' : '')
+                    + '<p style="font-size: 16px; font-weight: 700; color: #64748B; line-height: 1.6;">' + (r.comment || '') + '</p></div>';
+            }).join('') || '<div style="padding: 50px; text-align: center; color: #94A3B8; font-weight: 800;">لا توجد تقييمات متاحة حالياً.</div>';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openChatSession() {
+            const currentUser = window.api?.getCachedUser() || {};
+            if (!window.api?.getCachedToken() || currentUser.role !== 'client') {
+                const returnToProfile = new URL(window.location.href);
+                returnToProfile.searchParams.set('contact', '1');
+                window.location.href = `login.html?redirect=${encodeURIComponent(returnToProfile.href)}`;
+                return;
+            }
+            if (currentUser.id === (window.currentProfileArtisan?.user_id || window.currentProfileArtisan?.id)) {
+                alert('لا يمكنك مراسلة حسابك الشخصي.');
+                return;
+            }
+            openMessageModal();
+        }
+
+        function openMessageModal() {
+            document.getElementById('messageModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('messageForm').onsubmit = async function (e) {
+            e.preventDefault();
+            const artisan = window.currentProfileArtisan || {};
+            const btn = e.target.querySelector('button[type="submit"]');
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> جاري الإرسال...';
+            btn.disabled = true;
+            lucide.createIcons();
+            try {
+                const res = await api.addMessage({
+                    sender_id: currentUser.id,
+                    sender_name: document.getElementById('senderName').value,
+                    receiver_id: artisan.user_id || artisan.id,
+                    receiver_name: artisan.name || '',
+                    content: document.getElementById('messageContent').value
+                });
+                if (!res.success) throw new Error(res.message || 'تعذر إرسال الرسالة.');
+                alert('تم إرسال رسالتك داخل المنصة.');
+                closeMessageModal();
+                e.target.reset();
+            } catch (error) {
+                alert(error.message || 'تعذر إرسال الرسالة. حاول مرة أخرى.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                lucide.createIcons();
+            }
+        };
+
+        window.onload = () => {
+            loadProfile().then(() => {
+                if (new URLSearchParams(window.location.search).get('contact') === '1') {
+                    openChatSession();
+                }
+            });
+            if (window.I18nManager) I18nManager.updateDOM();
+        };
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

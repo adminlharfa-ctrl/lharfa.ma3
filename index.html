@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="home_page_title">lharfa.ma | منصتك الموثوقة لخدمات الصيانة والمنزل بالمغرب</title>
+    <meta name="description"
+        content="lharfa.ma منصة تساعد الزبائن على البحث عن الحرفيين والتواصل معهم.">
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="translations.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="i18n-manager.js"></script>
+    <script src="navbar.js" defer></script>
+    <style>
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 38px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .hero-description {
+                font-size: 16px !important;
+                margin-bottom: 30px !important;
+            }
+
+            .elite-search-panel {
+                flex-direction: column;
+                padding: 20px !important;
+                gap: 10px !important;
+                border-radius: 30px !important;
+            }
+
+            .elite-dropdown {
+                min-width: 100% !important;
+            }
+
+            .elite-dropdown-trigger {
+                padding: 12px 20px !important;
+            }
+
+            .hero-trust {
+                flex-direction: column;
+                gap: 15px !important;
+                margin-top: 40px !important;
+                font-size: 14px !important;
+            }
+
+            .section-header-premium h2 {
+                font-size: 32px !important;
+            }
+
+            .why-title {
+                font-size: 30px !important;
+            }
+
+            .why-us-image .glass-panel {
+                bottom: 15px !important;
+                left: 15px !important;
+                right: 15px !important;
+                padding: 15px 20px !important;
+                border-radius: 20px !important;
+                justify-content: center !important;
+                gap: 15px !important;
+                box-sizing: border-box !important;
+            }
+        }
+
+        /* Premium Scroll Animations */
+        .reveal-hidden {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: all 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .reveal-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <!-- Navbar Container -->
+    <nav class="navbar"></nav>
+
+    <!-- Premium Hero Section -->
+    <header class="premium-hero" style="position: relative; overflow: visible; z-index: 100;">
+        <div class="hero-glow"
+            style="position: absolute; top: -10%; left: -10%; width: 50%; height: 50%; background: radial-gradient(circle, var(--primary-orange-mid) 0%, transparent 70%); filter: blur(100px); opacity: 0.6;">
+        </div>
+        <div class="hero-glow"
+            style="position: absolute; bottom: -10%; right: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%); filter: blur(100px); opacity: 0.4;">
+        </div>
+
+        <div class="container hero-inner" style="position: relative; z-index: 10; text-align: center;">
+            <div class="hero-badge pulse-glow"
+                style="background: var(--primary-orange-mid); color: var(--primary-orange); padding: 10px 25px; border-radius: 100px; display: inline-flex; align-items: center; gap: 10px; font-weight: 950; font-size: 14px; margin-bottom: 30px; border: 1px solid var(--primary-orange-mid);"
+                data-i18n="platform_status">
+                <i data-lucide="wrench" style="width: 18px;"></i> منصة البحث عن الحرفيين
+            </div>
+
+            <h1 class="hero-title"
+                style="font-size: clamp(40px, 6vw, 75px); font-weight: 950; color: white; line-height: 1.1; margin-bottom: 30px;"
+                data-i18n="hero_title">
+                ابحث عن <span class="text-orange"
+                    style="background: var(--grad-red); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">محترف
+                    موثوق</span><br>لكل احتياجاتك المنزلية
+            </h1>
+
+            <p class="hero-description"
+                style="color: var(--text-light); font-size: 20px; font-weight: 700; max-width: 800px; margin: 0 auto 50px; line-height: 1.6;"
+                data-i18n="hero_subtitle">
+                نربطك بأفضل الحرفيين في منطقتك بضغطة زر واحدة. خدمات موثوقة، جودة مضمونة، وأسعار شفافة.
+            </p>
+
+            <!-- Elite Custom Search Box -->
+            <div class="dark-glass-panel elite-search-panel"
+                style="max-width: 950px; margin: 0 auto; padding: 15px; border-radius: 30px; display: flex; gap: 15px; box-shadow: 0 40px 100px rgba(0,0,0,0.5); position: relative; z-index: 200;">
+                <!-- Custom Category Dropdown -->
+                <div class="elite-dropdown" id="categoryDropdown"
+                    style="flex: 1; min-width: 250px; position: relative;">
+                    <div class="elite-dropdown-trigger"
+                        style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer;">
+                        <i data-lucide="wrench" style="color: var(--primary-orange); width: 22px;"></i>
+                        <div style="flex: 1; text-align: right;">
+                            <label
+                                style="display: block; font-size: 11px; color: var(--text-light); font-weight: 900; text-transform: uppercase; margin-bottom: 5px; pointer-events: none;"
+                                data-i18n="category_label">التخصص</label>
+                            <div class="selected-value" style="color: white; font-weight: 800; font-size: 16px;"
+                                data-value="" data-i18n="all_specialties">جميع التخصصات</div>
+                        </div>
+                        <i data-lucide="chevron-down"
+                            style="color: var(--text-light); width: 18px; transition: 0.3s;"></i>
+                    </div>
+                    <div class="elite-dropdown-menu"
+                        style="position: absolute; top: calc(100% + 10px); left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: 0.3s; box-shadow: 0 20px 40px rgba(0,0,0,0.4); max-height: 350px; overflow-y: auto; color-scheme: dark;">
+                        <div class="elite-option active" data-value="" data-i18n="all_specialties">جميع التخصصات</div>
+                        <div class="elite-option" data-value="electricity" data-i18n="electricity">الكهرباء</div>
+                        <div class="elite-option" data-value="plumbing" data-i18n="plumbing">السباكة</div>
+                        <div class="elite-option" data-value="carpentry" data-i18n="carpentry">النجارة</div>
+                        <div class="elite-option" data-value="painting" data-i18n="painting">الصباغة</div>
+                        <div class="elite-option" data-value="masonry" data-i18n="masonry">البناء</div>
+                        <div class="elite-option" data-value="ac" data-i18n="ac">التكييف</div>
+                        <div class="elite-option" data-value="transport" data-i18n="transport">النقل</div>
+                        <div class="elite-option" data-value="appliances" data-i18n="appliances">إلكترومنزلي</div>
+                        <div class="elite-option" data-value="cleaning" data-i18n="cleaning">التنظيف</div>
+                        <div class="elite-option" data-value="aluminum" data-i18n="aluminum">الألمنيوم</div>
+                    </div>
+                </div>
+
+                <!-- Custom City Dropdown -->
+                <div class="elite-dropdown" id="cityDropdown" style="flex: 1; min-width: 250px; position: relative;">
+                    <div class="elite-dropdown-trigger"
+                        style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer;">
+                        <i data-lucide="map-pin" style="color: var(--primary-orange); width: 22px;"></i>
+                        <div style="flex: 1; text-align: right;">
+                            <label
+                                style="display: block; font-size: 11px; color: var(--text-light); font-weight: 900; text-transform: uppercase; margin-bottom: 5px; pointer-events: none;"
+                                data-i18n="city_label">المدينة</label>
+                            <div class="selected-value" style="color: white; font-weight: 800; font-size: 16px;"
+                                data-value="taroudant" data-i18n="taroudant">تارودانت</div>
+                        </div>
+                        <i data-lucide="chevron-down"
+                            style="color: var(--text-light); width: 18px; transition: 0.3s;"></i>
+                    </div>
+                    <div class="elite-dropdown-menu"
+                        style="position: absolute; top: calc(100% + 10px); left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: 0.3s; box-shadow: 0 20px 40px rgba(0,0,0,0.4); max-height: 350px; overflow-y: auto; color-scheme: dark;">
+                        <div class="elite-option" data-value="" data-i18n="all_cities">جميع المدن</div>
+                        <div class="elite-option active" data-value="taroudant" data-i18n="taroudant">تارودانت</div>
+                        <div class="elite-option" data-value="agadir" data-i18n="agadir">أكادير</div>
+                        <div class="elite-option" data-value="marrakech" data-i18n="marrakech">مراكش</div>
+                    </div>
+                </div>
+
+                <button onclick="handleHeroSearch()" class="hover-float pulse-glow"
+                    style="background: var(--primary-orange); color: white; border: none; padding: 0 40px; border-radius: 20px; font-weight: 950; font-size: 18px; cursor: pointer; min-height: 70px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-orange);">
+                    <span data-i18n="search_now">ابحث الآن</span> <i data-lucide="search"></i>
+                </button>
+            </div>
+
+            <div class="hero-trust-elite"
+                style="display: flex; justify-content: center; gap: 15px; margin-top: 60px; flex-wrap: wrap;">
+                <div class="elite-trust-chip">
+                    <i data-lucide="users"></i>
+                    <span data-i18n="pro_artisans">حرفيين موثقين</span>
+                </div>
+                <div class="elite-trust-chip">
+                    <i data-lucide="award"></i>
+                    <span data-i18n="guaranteed_quality">جودة مضمونة</span>
+                </div>
+                <div class="elite-trust-chip">
+                    <i data-lucide="shield-check"></i>
+                    <span data-i18n="secure_platform">حماية المنصة</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- How it Works Section -->
+    <section class="section how-it-works-section" style="padding: 100px 0 60px; background: #fdfdfd; position: relative; overflow: hidden;">
+        <div class="container">
+            <div class="section-header-premium" style="text-align: center; margin-bottom: 70px;">
+                <span class="section-tag-premium" data-i18n="how_it_works_title">كيف يعمل lharfa.ma؟</span>
+                <h2 style="font-size: 42px; font-weight: 950; color: var(--text-dark); margin-top: 10px;"
+                    data-i18n="how_it_works_subtitle">ثلاث خطوات بسيطة للحصول على أفضل خدمة</h2>
+            </div>
+
+            <div class="how-it-works-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; position: relative;">
+                <!-- Step 1 -->
+                <div class="hover-float how-step-card"
+                    style="background: white; padding: 40px; border-radius: 40px; border: 1px solid var(--border-color); text-align: center; position: relative; z-index: 1;">
+                    <div class="how-step-icon"
+                        style="width: 80px; height: 80px; background: rgba(255, 63, 0, 0.1); color: var(--primary-orange); border-radius: 25px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 32px;">
+                        <i data-lucide="search"></i>
+                    </div>
+                    <h3 style="font-size: 24px; font-weight: 950; color: var(--text-dark); margin-bottom: 15px;"
+                        data-i18n="step_1_title">1. ابحث</h3>
+                    <p style="color: var(--text-muted); font-weight: 700; line-height: 1.6;" data-i18n="step_1_desc">
+                        اختر التخصص والمدينة للاطلاع على ملفات الحرفيين المتاحة.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="hover-float how-step-card"
+                    style="background: white; padding: 40px; border-radius: 40px; border: 1px solid var(--border-color); text-align: center; position: relative; z-index: 1;">
+                    <div class="how-step-icon"
+                        style="width: 80px; height: 80px; background: rgba(255, 63, 0, 0.1); color: var(--primary-orange); border-radius: 25px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 32px;">
+                        <i data-lucide="message-square"></i>
+                    </div>
+                    <h3 style="font-size: 24px; font-weight: 950; color: var(--text-dark); margin-bottom: 15px;"
+                        data-i18n="step_2_title">2. تواصل</h3>
+                    <p style="color: var(--text-muted); font-weight: 700; line-height: 1.6;" data-i18n="step_2_desc">
+                        دردش مع الحرفي مباشرة لشرح طلبك، تحديد الموعد، والاتفاق على التفاصيل.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="hover-float how-step-card"
+                    style="background: white; padding: 40px; border-radius: 40px; border: 1px solid var(--border-color); text-align: center; position: relative; z-index: 1;">
+                    <div class="how-step-icon"
+                        style="width: 80px; height: 80px; background: rgba(255, 63, 0, 0.1); color: var(--primary-orange); border-radius: 25px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 32px;">
+                        <i data-lucide="check-circle"></i>
+                    </div>
+                    <h3 style="font-size: 24px; font-weight: 950; color: var(--text-dark); margin-bottom: 15px;"
+                        data-i18n="step_3_title">3. استمتع</h3>
+                    <p style="color: var(--text-muted); font-weight: 700; line-height: 1.6;" data-i18n="step_3_desc">
+                        احصل على خدمتك بجودة عالية، ادفع مباشرة للحرفي، وقيّم تجربتك لتعم الفائدة.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Counter Section -->
+    <section class="elite-stats-section" style="padding: 80px 0; background: #05070A; color: white;">
+        <div class="container">
+            <p style="margin: 0; color: rgba(255,255,255,0.72); text-align: center; font-weight: 700;">
+                ستظهر إحصاءات المنصة هنا عند توفر بيانات موثوقة.
+            </p>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section id="services" class="section" style="padding: 120px 0; background: white;">
+        <div class="container">
+            <div class="section-header-premium" style="text-align: center; margin-bottom: 80px;">
+                <span class="section-tag-premium" data-i18n="our_services">ماذا نقدم لك</span>
+                <h2 style="font-size: 52px; font-weight: 950; color: var(--text-dark); margin-top: 10px;"
+                    data-i18n="services_title">خدمات احترافية <span class="text-gradient">بين يديك</span></h2>
+                <p class="text-muted" style="font-size: 18px; font-weight: 700; max-width: 600px; margin: 20px auto 0;"
+                    data-i18n="services_subtitle">اختر التخصص الذي تحتاجه وتصفح قائمة الحرفيين الموثقين بعناية في
+                    منطقتك.</p>
+            </div>
+
+            <div class="services-grid-premium"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px;">
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('electricity')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="electricity">الكهرباء</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('plumbing')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="droplets"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="plumbing">السباكة</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('carpentry')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="hammer"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="carpentry">النجارة</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('painting')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="paint-roller"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="painting">الصباغة</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('masonry')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="construction"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="masonry">البناء</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('ac')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="wind"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="ac">التكييف</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('transport')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="transport">النقل</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('appliances')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="tv"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="appliances">إلكترومنزلي</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('cleaning')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="sparkles"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="cleaning">التنظيف</span>
+                </div>
+                <div class="service-chip hover-float"
+                    style="background: #F8FAFC; padding: 40px 20px; border-radius: 35px; text-align: center; border: 1.5px solid var(--border-color); cursor: pointer;"
+                    onclick="filterByCategory('aluminum')">
+                    <div class="chip-icon"
+                        style="width: 70px; height: 70px; background: white; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--primary-orange); box-shadow: var(--shadow-sm);">
+                        <i data-lucide="layout"></i>
+                    </div>
+                    <span style="font-weight: 950; font-size: 18px; color: var(--text-dark);"
+                        data-i18n="aluminum">الألمنيوم</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us (Premium Dark) -->
+    <section class="section"
+        style="background: var(--bg-dark); color: white; padding: 120px 0; position: relative; overflow: hidden;">
+        <div class="hero-glow"
+            style="position: absolute; top: 0; right: 0; width: 40%; height: 100%; background: radial-gradient(circle, var(--primary-orange-mid) 0%, transparent 70%); filter: blur(100px); opacity: 0.3;">
+        </div>
+
+        <div class="container">
+            <div class="why-us-grid" style="display: grid; gap: 80px; align-items: center;">
+                <div class="why-us-content">
+                    <span class="section-tag-premium" style="color: var(--primary-orange);" data-i18n="why_us">لماذا
+                        تختارنا</span>
+                    <h2 class="why-title"
+                        style="font-size: 48px; font-weight: 950; margin: 20px 0 40px; line-height: 1.2;"
+                        data-i18n="why_us_title">نحن نضع <span class="text-orange">الجودة والسرية</span> في مقدمة
+                        أولوياتنا</h2>
+
+                    <div class="why-list" style="display: flex; flex-direction: column; gap: 35px;">
+                        <div style="display: flex; gap: 25px;">
+                            <div
+                                style="width: 60px; height: 60px; border-radius: 18px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary-orange); flex-shrink: 0;">
+                                <i data-lucide="shield-check"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 20px; font-weight: 950; margin-bottom: 10px;"
+                                    data-i18n="pro_artisans">معلومات الحرفيين</h4>
+                                <p style="color: var(--text-light); font-weight: 700; line-height: 1.6;"
+                                    data-i18n="pro_artisans_desc">ستظهر معلومات الحرفيين بعد مراجعة البيانات المقدمة.</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 25px;">
+                            <div
+                                style="width: 60px; height: 60px; border-radius: 18px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary-orange); flex-shrink: 0;">
+                                <i data-lucide="clock"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 20px; font-weight: 950; margin-bottom: 10px;"
+                                    data-i18n="fast_response">سرعة استجابة فائقة</h4>
+                                <p style="color: var(--text-light); font-weight: 700; line-height: 1.6;"
+                                    data-i18n="fast_response_desc">تواصل مع الحرفي لمناقشة الخدمة والموعد المناسب.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="why-us-image" style="position: relative;">
+                    <div class="hover-float"
+                        style="border-radius: 40px; overflow: hidden; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
+                        <img src="moroccan_artisan_hero.png" alt="Moroccan Artisan"
+                            style="width: 100%; display: block;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Artisans Section -->
+    <section class="section" style="padding: 120px 0; background: #f8fafc;">
+        <div class="container">
+            <div class="section-header-premium" style="text-align: center; margin-bottom: 80px;">
+                <span class="section-tag-premium">الحرفيون</span>
+                    <h2 style="font-size: 52px; font-weight: 950; color: var(--text-dark); margin-top: 10px;">
+                        تصفح الحرفيين</h2>
+                <p class="text-muted" style="font-size: 18px; font-weight: 700; max-width: 600px; margin: 20px auto 0;"
+                        ابحث عن حرفي حسب التخصص والمدينة.</p>
+            </div>
+
+            <div style="padding: 50px 20px; text-align: center; color: var(--text-muted); font-weight: 800;">
+                ستظهر ملفات الحرفيين هنا عند توفر بيانات حقيقية.
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section" style="padding: 120px 0; background: white; position: relative;">
+        <div class="container">
+            <div class="section-header-premium" style="text-align: center; margin-bottom: 80px;">
+                <span class="section-tag-premium" data-i18n="testimonials_title">آراء زبنائنا</span>
+                    <h2 style="font-size: 48px; font-weight: 950; color: var(--text-dark);">تقييمات موثوقة من مستخدمي المنصة</h2>
+            </div>
+
+            <div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-weight: 800;">
+                ستظهر آراء الزبائن هنا بعد توفر تقييمات حقيقية.
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-container"></div>
+    <script src="footer.js" defer></script>
+
+    <script>
+        // Elite Dropdown Logic
+        document.querySelectorAll('.elite-dropdown-trigger').forEach(trigger => {
+            trigger.onclick = (e) => {
+                e.stopPropagation();
+                const parent = trigger.parentElement;
+                const menu = parent.querySelector('.elite-dropdown-menu');
+                const isOpen = parent.classList.contains('active');
+
+                // Close all other dropdowns
+                document.querySelectorAll('.elite-dropdown').forEach(d => d.classList.remove('active'));
+
+                if (!isOpen) {
+                    parent.classList.add('active');
+                }
+            };
+        });
+
+        document.querySelectorAll('.elite-option').forEach(option => {
+            option.onclick = (e) => {
+                e.stopPropagation();
+                const parent = option.closest('.elite-dropdown');
+                const triggerValue = parent.querySelector('.selected-value');
+                const menu = parent.querySelector('.elite-dropdown-menu');
+
+                // Update text and value
+                triggerValue.textContent = option.textContent;
+                triggerValue.dataset.value = option.dataset.value;
+                triggerValue.dataset.i18n = option.dataset.i18n;
+
+                // Update active state in menu
+                parent.querySelectorAll('.elite-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+
+                // Close menu
+                parent.classList.remove('active');
+
+                // Optional: Trigger translation update if needed
+                if (window.I18nManager) window.I18nManager.updateDOM();
+            };
+        });
+
+        // Close dropdowns on outside click
+        window.onclick = () => {
+            document.querySelectorAll('.elite-dropdown').forEach(d => d.classList.remove('active'));
+        };
+
+        function handleHeroSearch() {
+            const city = document.querySelector('#cityDropdown .selected-value').dataset.value;
+            const category = document.querySelector('#categoryDropdown .selected-value').dataset.value;
+            let url = 'artisans.html?';
+            const params = [];
+            if (city) params.push(`city=${city}`);
+            if (category) params.push(`category=${category}`);
+            window.location.href = url + params.join('&');
+        }
+
+        function filterByCategory(cat) {
+            const user = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const userCity = user.city || '';
+            let url = `artisans.html?category=${cat}`;
+            if (userCity) url += `&city=${encodeURIComponent(userCity)}`;
+            window.location.href = url;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            if (window.I18nManager) I18nManager.updateDOM();
+
+            // Premium Scroll Reveal Animation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('reveal-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+            document.querySelectorAll('.section, .artisan-card-premium, .service-chip, .testimonial-card, .why-us-content, .why-us-image').forEach((el, index) => {
+                el.classList.add('reveal-hidden');
+                // Stagger transition delay based on index for grouped items
+                if (el.classList.contains('service-chip') || el.classList.contains('artisan-card-premium') || el.classList.contains('testimonial-card')) {
+                    el.style.transitionDelay = `${(index % 4) * 0.1}s`;
+                }
+                observer.observe(el);
+            });
+        });
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

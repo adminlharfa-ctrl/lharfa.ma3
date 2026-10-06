@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login_page_title">تسجيل الدخول | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="translations.js"></script>
+    <script src="i18n-manager.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="navbar.js" defer></script>
+    <style>
+        body {
+            background: var(--primary-black);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Dynamic Background Glows */
+        .auth-bg-glow-1 {
+            position: fixed;
+            top: -10%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, var(--primary-red-glow) 0%, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+            animation: pulse-glow 10s infinite alternate;
+        }
+
+        .auth-bg-glow-2 {
+            position: fixed;
+            bottom: -10%;
+            left: -10%;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(255, 63, 0, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+            animation: pulse-glow 8s infinite alternate-reverse;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+            100% { transform: scale(1.2) translate(5%, 5%); opacity: 0.8; }
+        }
+
+        .auth-page-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .premium-auth-card {
+            background: rgba(5, 7, 10, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 40px;
+            padding: 60px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .premium-auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
+            opacity: 0.5;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .auth-logo {
+            display: inline-block;
+            margin-bottom: 25px;
+            font-size: 32px;
+            font-weight: 950;
+            color: white;
+            text-decoration: none;
+            
+        }
+
+        .auth-logo img {
+            height: 40px !important;
+            width: auto !important;
+            object-fit: contain;
+        }
+
+        .auth-title {
+            font-size: 32px;
+            font-weight: 950;
+            margin-bottom: 12px;
+            color: white;
+            
+        }
+
+        .auth-subtitle {
+            font-size: 15px;
+            color: #94A3B8;
+            font-weight: 700;
+        }
+
+        .premium-form-group {
+            margin-bottom: 28px;
+        }
+
+        .premium-form-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #CBD5E1;
+        }
+
+        .premium-form-group label i {
+            color: var(--primary-red);
+            width: 18px;
+            height: 18px;
+        }
+
+        .premium-input-box {
+            position: relative;
+        }
+
+        .premium-input-box input {
+            width: 100%;
+            height: 64px;
+            padding: 0 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s ease;
+            outline: none;
+            direction: ltr; /* Email and Password are usually LTR */
+        }
+
+        [dir="rtl"] .premium-input-box input {
+            text-align: right;
+        }
+
+        .premium-input-box input:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 4px rgba(255, 63, 0, 0.15);
+        }
+
+        .eye-btn {
+            position: absolute;
+            left: 20px; /* Positioned on the left for RTL layout when input is RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748B;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            z-index: 5;
+        }
+
+        [dir="rtl"] .eye-btn {
+            left: 20px;
+            right: auto;
+        }
+
+        .eye-btn:hover {
+            color: white;
+        }
+
+        .auth-error-alert {
+            background: rgba(239, 68, 68, 0.1);
+            color: #FCA5A5;
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .login-submit-btn {
+            width: 100%;
+            height: 64px;
+            background: var(--grad-red);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 17px;
+            font-weight: 950;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(255, 63, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 63, 0, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .login-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .text-red {
+            color: var(--primary-red) !important;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .text-red:hover {
+            filter: brightness(1.2);
+            text-decoration: underline;
+        }
+
+        .remember-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-checkbox input {
+            display: none;
+        }
+
+        .checkmark {
+            width: 22px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .custom-checkbox input:checked + .checkmark {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        .checkmark i {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: 0.3s;
+        }
+
+        .custom-checkbox input:checked + .checkmark i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .footer-links-box {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .auth-logo {
+                font-size: 28px !important;
+                gap: 8px !important;
+            }
+
+            .auth-logo img {
+                height: 35px !important;
+            }
+
+            .premium-auth-card {
+                padding: 40px 25px;
+                border-radius: 30px;
+            }
+
+            .auth-title {
+                font-size: 26px;
+            }
+
+            .auth-page-wrapper {
+                padding: 40px 15px;
+            }
+
+            .login-submit-btn {
+                height: 60px;
+            }
+        }
+    </style>
+    <script src="footer.js" defer></script>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <div class="auth-bg-glow-1"></div>
+    <div class="auth-bg-glow-2"></div>
+
+    <nav class="navbar"></nav>
+
+    <div class="auth-page-wrapper">
+        <div class="premium-auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="auth-logo" style="color: var(--primary-red); display: inline-flex; align-items: center; justify-content: center; gap: 12px; direction: ltr;">
+                    <img src="logo1.png" alt="lharfa.ma Logo" style="height: 40px; width: auto; border-radius: 8px;">
+                    <span>lharfa<span style="color: white;">.ma</span></span>
+                </a>
+                <h1 class="auth-title" data-i18n="welcome_back">مرحباً بعودتك</h1>
+                <p class="auth-subtitle" data-i18n="login_subtitle">سجل دخولك لمتابعة أعمالك وطلباتك</p>
+            </div>
+
+            <div class="auth-error-alert" id="loginError">
+                <i data-lucide="alert-circle"></i>
+                <span id="errorMsg"></span>
+            </div>
+
+            <form id="loginForm">
+                <div class="premium-form-group">
+                    <label><i data-lucide="mail"></i> <span data-i18n="email">البريد الإلكتروني</span></label>
+                    <div class="premium-input-box">
+                        <input type="email" id="loginEmail" placeholder="example@mail.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="premium-form-group">
+                    <label><i data-lucide="lock"></i> <span data-i18n="password">كلمة المرور</span></label>
+                    <div class="premium-input-box">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+                        <button type="button" class="eye-btn" onclick="togglePass('loginPassword', this)">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="remember-section">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="remember">
+                        <span class="checkmark"><i data-lucide="check"></i></span>
+                        <span style="font-size:14px; color:#94A3B8; font-weight:700;" data-i18n="remember_me">تذكرني على هذا الجهاز</span>
+                    </label>
+                    <a href="#" onclick="PlatformActions.forgotPassword(); return false;" class="text-red" style="font-size: 13px; font-weight: 800;" data-i18n="forgot_password">نسيت كلمة المرور؟</a>
+                </div>
+
+                <button type="submit" class="login-submit-btn" id="loginBtn">
+                    <span data-i18n="login_btn">تسجيل الدخول</span> <i data-lucide="log-in"></i>
+                </button>
+            </form>
+
+            <div class="footer-links-box">
+                <p style="font-size: 15px; color: #94A3B8; font-weight: 700;">
+                    <span data-i18n="no_account">ليس لديك حساب؟</span>
+                    <a href="register.html" class="text-red" style="font-weight:950; margin-right: 8px;"
+                        data-i18n="create_account">إنشاء حساب جديد</a>
+                </p>
+                <div style="margin-top: 20px; font-size: 12px; color: #64748B; opacity: 0.8; font-weight: 700;">
+                    <span data-i18n="login_agreement">تسجيل الدخول يعني الموافقة على</span>
+                    <a href="terms.html" class="text-red" style="text-decoration: underline;">الشروط</a> و <a href="privacy.html"
+                        class="text-red" style="text-decoration: underline;">الخصوصية</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Container -->
+    <div class="footer-container"></div>
+
+    <script>
+        function togglePass(id, btn) {
+            const inp = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.dataset.lucide = 'eye-off';
+            } else {
+                inp.type = 'password';
+                icon.dataset.lucide = 'eye';
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errBox = document.getElementById('loginError');
+            const errMsg = document.getElementById('errorMsg');
+
+            errBox.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" style="animation: spin 1s linear infinite;"></i> <span data-i18n="loading">جاري التحميل...</span>`;
+            if (window.lucide) lucide.createIcons();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                if (!window.api || typeof window.api.login !== 'function') {
+                    throw new Error('تعذر تحميل واجهة الموقع. أعد تحميل الصفحة وحاول مرة أخرى.');
+                }
+
+                const data = await window.api.login(email, password, document.getElementById('remember').checked);
+                if (data.success) {
+                    const params = new URLSearchParams(window.location.search);
+                    const role = data.user?.role || 'client';
+                    const defaultRedirect = role === 'artisan' ? 'artisan-dashboard.html' : (role === 'admin' ? 'admin-dashboard.html' : 'client-dashboard.html');
+                    const requestedRedirect = params.get('redirect');
+                    let redirect = defaultRedirect;
+                    if (requestedRedirect) {
+                        try {
+                            const target = new URL(requestedRedirect, window.location.href);
+                            const allowed = {
+                                'client-dashboard.html': ['client'],
+                                'artisan-dashboard.html': ['artisan'],
+                                'admin-dashboard.html': ['admin']
+                            };
+                            const page = Object.keys(allowed).find((name) => target.pathname === new URL(name, window.location.href).pathname);
+                            const isArtisanContact = target.pathname === new URL('artisan-profile.html', window.location.href).pathname
+                                && target.searchParams.get('contact') === '1'
+                                && role === 'client';
+                            if (target.origin === window.location.origin && ((page && allowed[page].includes(role)) || isArtisanContact)) {
+                                redirect = target.href;
+                            }
+                        } catch {
+                            // Invalid redirects fall back to the user's role dashboard.
+                        }
+                    }
+                    window.location.href = redirect;
+                    return;
+                }
+
+                throw new Error(data.message || 'تعذر تسجيل الدخول. حاول مرة أخرى.');
+            } catch (err) {
+                errMsg.textContent = err.message;
+                errBox.style.display = 'flex';
+                btn.disabled = false;
+                btn.innerHTML = `<span data-i18n="login_btn">تسجيل الدخول</span> <i data-lucide="log-in"></i>`;
+                if (window.lucide) lucide.createIcons();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (window.I18nManager) I18nManager.updateDOM();
+            if (window.lucide) lucide.createIcons();
+            if (window.api?.backendConfigured) {
+                const current = await window.api.getCurrentUser();
+                if (current.success && current.user) {
+                    const dashboard = current.user.role === 'artisan'
+                        ? 'artisan-dashboard.html'
+                        : (current.user.role === 'admin' ? 'admin-dashboard.html' : 'client-dashboard.html');
+                    window.location.replace(dashboard);
+                }
+            }
+        });
+    </script>
+    <script src="platform-actions.js"></script>
+</body>
+
+</html>

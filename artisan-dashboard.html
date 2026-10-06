@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="artisan_dashboard_page_title">لوحة التحكم | lharfa.ma</title>
+    <link rel="icon" type="image/jpeg" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="translations.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="api.js" defer></script>
+    <script src="i18n-manager.js" defer></script>
+    <script src="dashboard-common.js" defer></script>
+    <style>
+        /* ELITE ARTISAN DASHBOARD DESIGN SYSTEM - PREMIUM DARK MODE */
+        :root {
+            --primary-orange: #FF3F00;
+            --primary-orange-light: rgba(255, 63, 0, 0.1);
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --text-muted: #94A3B8;
+            --success-green: #10B981;
+            --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.2);
+            --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 280px;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 0% 0%, rgba(255, 63, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(255, 63, 0, 0.02) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .dashboard-body-wrapper {
+            height: 100vh;
+            display: flex;
+            position: relative;
+        }
+
+        /* --- PREMIUM SCROLLBAR --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-orange);
+        }
+
+        /* --- MODERN SIDEBAR --- */
+        .artisan-sidebar {
+            width: var(--sidebar-width);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(20px);
+            border-inline-end: 1px solid var(--border-color);
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            flex-shrink: 0;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-brand {
+            padding: 40px 30px;
+            font-size: 32px;
+            font-weight: 950;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-list-premium {
+            flex: 1;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-link-premium {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 20px;
+            border-radius: 18px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition-base);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link-premium:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link-premium.active {
+            background: linear-gradient(90deg, rgba(255, 63, 0, 0.1) 0%, transparent 100%);
+            color: var(--primary-orange);
+            border-inline-start: 4px solid var(--primary-orange);
+            font-weight: 900;
+        }
+
+        /* --- CONTENT AREA --- */
+        .artisan-main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .hero-banner-premium {
+            padding: 22px 28px;
+            margin-bottom: 24px;
+            border-radius: 28px;
+        }
+
+        .hero-banner-content {
+            gap: 24px !important;
+        }
+
+        .hero-welcome-message h1 {
+            font-size: 44px !important;
+            margin-bottom: 8px !important;
+        }
+
+        .hero-welcome-message p {
+            font-size: 20px !important;
+        }
+
+        .hero-banner-premium .status-container {
+            min-width: 160px;
+            padding: 12px 16px;
+            gap: 8px;
+            border-radius: 22px;
+        }
+
+        .hero-banner-premium .status-container > p {
+            font-size: 14px !important;
+        }
+
+        .hero-banner-premium #statusBadgeLarge {
+            padding: 6px 12px !important;
+            font-size: 12px !important;
+        }
+
+        /* --- MOBILE HAMBURGER --- */
+        .mobile-nav-toggle {
+            display: none;
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            width: 65px;
+            height: 65px;
+            background: var(--primary-orange);
+            color: white;
+            border-radius: 22px;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(255, 63, 0, 0.4);
+            border: none;
+            font-size: 24px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 900;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        /* --- GLASS COMPONENTS --- */
+        .glass-card-v3 {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 35px;
+            box-shadow: var(--shadow-premium);
+        }
+
+        .status-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            transition: var(--transition-base);
+        }
+
+        .status-container:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- STAT CARDS --- */
+        .stat-grid-premium {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card-v3 {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition-base);
+        }
+
+        .stat-card-v3:hover {
+            transform: translateY(-5px);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .stat-icon-v3 {
+            width: 65px;
+            height: 65px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+        }
+
+        /* --- TOGGLE --- */
+        .toggle-switch {
+            width: 70px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 4px;
+            cursor: pointer;
+            transition: 0.4s;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-switch.on {
+            background: var(--primary-orange);
+        }
+
+        .toggle-thumb {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.4s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.on .toggle-thumb {
+            transform: translateX(-34px);
+        }
+
+        .tab-section {
+            display: none;
+            width: 100%;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- ORDER CARDS --- */
+        .order-card-premium {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(25px);
+            border-radius: 32px;
+            padding: 35px;
+            margin-bottom: 30px;
+            transition: var(--transition-base);
+            border: 1px solid var(--border-color);
+        }
+
+        .order-card-premium:hover {
+            transform: translateY(-5px);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        /* --- MESSENGER REBORN --- */
+        .premium-messenger {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(40px);
+            border-radius: 35px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            height: calc(100vh - 150px);
+            position: relative;
+        }
+
+        .ms-sidebar {
+            background: rgba(15, 23, 42, 0.2);
+            border-inline-end: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ms-chat {
+            display: flex;
+            flex-direction: column;
+            background: rgba(2, 6, 23, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-list-item {
+            padding: 20px 25px;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            position: relative;
+        }
+
+        .chat-list-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .chat-list-item.active {
+            background: rgba(255, 63, 0, 0.08);
+        }
+
+        .chat-list-item.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 4px;
+            background: var(--primary-orange);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 15px var(--primary-orange);
+        }
+
+        .chat-bubble {
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            max-width: 75%;
+            line-height: 1.6;
+            position: relative;
+            font-size: 14.5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: bubbleAppear 0.3s ease-out;
+        }
+
+        @keyframes bubbleAppear {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* In RTL: bubble-out (Sent) is on LEFT, bubble-in (Received) is on RIGHT */
+        .bubble-in {
+            background: rgba(255, 255, 255, 0.06);
+            color: #F1F5F9;
+            border-bottom-right-radius: 4px;
+            align-self: flex-start;
+            margin-inline-end: auto;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .bubble-out {
+            background: linear-gradient(135deg, var(--primary-orange), #FF5722);
+            color: white;
+            border-bottom-left-radius: 4px;
+            align-self: flex-end;
+            margin-inline-start: auto;
+            box-shadow: 0 8px 25px rgba(255, 63, 0, 0.2);
+        }
+
+        .chat-time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 6px;
+            display: block;
+            font-weight: 800;
+        }
+
+        .bubble-out .chat-time {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: left;
+        }
+        
+        .bubble-in .chat-time {
+            text-align: right;
+        }
+
+        /* --- INPUTS & BUTTONS --- */
+        .premium-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 15px;
+            padding: 18px 25px;
+            color: white !important;
+            font-weight: 700;
+            transition: 0.3s;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .premium-input:focus {
+            border-color: var(--primary-orange) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            outline: none;
+        }
+
+        select.premium-input {
+            color-scheme: dark;
+        }
+
+        select.premium-input option {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        select.premium-input option:checked {
+            background-color: #c2410c;
+            color: #ffffff;
+        }
+
+        .form-label {
+            font-weight: 950;
+            font-size: 14px;
+            color: var(--text-muted) !important;
+            margin-bottom: 5px;
+            display: block;
+            padding-right: 5px;
+        }
+
+        .btn-premium {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 15px 35px;
+            border-radius: 22px;
+            font-weight: 900;
+            font-size: 16px;
+            transition: var(--transition-base);
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-indigo {
+            background: linear-gradient(135deg, var(--primary-orange), #CC3D00);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 63, 0, 0.3);
+        }
+
+        .btn-indigo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 63, 0, 0.4);
+        }
+
+        .btn-outline-premium {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: white;
+        }
+
+        .btn-outline-premium:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: white;
+        }
+
+        /* --- RESPONSIVE BREAKPOINTS --- */
+        @media (max-width: 1024px) {
+            .artisan-sidebar {
+                position: fixed;
+                right: -100%;
+                top: 0;
+                transform: translateX(100%);
+                width: 300px;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+                background: rgba(15, 23, 42, 0.95);
+            }
+
+            .artisan-sidebar.active {
+                right: 0;
+                transform: translateX(0);
+            }
+
+            .mobile-nav-toggle {
+                display: flex;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .artisan-main {
+                padding: 25px 15px;
+                padding-top: 100px;
+            }
+
+            .stat-grid-premium {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .premium-messenger {
+                display: block !important;
+                height: calc(100vh - 120px) !important;
+                border-radius: 25px;
+                position: relative;
+            }
+
+            .ms-sidebar {
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
+                border-inline-end: none !important;
+            }
+
+            .ms-chat {
+                display: none !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 100;
+                background: #0B1120;
+            }
+
+            .premium-messenger.show-chat .ms-sidebar {
+                display: none !important;
+            }
+
+            .premium-messenger.show-chat .ms-chat {
+                display: flex !important;
+            }
+
+            .mobile-back-btn {
+                display: flex !important;
+                margin-inline-end: 10px;
+            }
+
+            #chatBody {
+                padding: 20px !important;
+            }
+
+            #chatHeader {
+                padding: 10px 15px !important;
+            }
+
+            .chat-bubble {
+                max-width: 90% !important;
+                padding: 12px 16px !important;
+                font-size: 14px !important;
+            }
+
+            .ms-chat {
+                flex: 1;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .artisan-main {
+                padding: 15px;
+                padding-top: 90px;
+            }
+
+            .hero-banner-premium {
+                padding: 16px;
+                border-radius: 22px;
+            }
+
+            .hero-banner-content {
+                gap: 14px !important;
+            }
+
+            .hero-welcome-message {
+                flex-basis: 100%;
+            }
+
+            .hero-banner-premium h1 {
+                font-size: 28px !important;
+            }
+
+            .hero-banner-premium p {
+                font-size: 15px !important;
+            }
+
+            .glass-card-v3,
+            .order-card-premium {
+                padding: 25px !important;
+                border-radius: 25px !important;
+            }
+
+            .status-container {
+                width: auto !important;
+                min-width: 0 !important;
+                margin-top: 0 !important;
+                padding: 12px !important;
+                gap: 8px !important;
+            }
+
+            .mobile-nav-toggle {
+                top: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .stat-icon-v3 {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .stat-card-v3 {
+                padding: 20px;
+            }
+
+            #pNameView {
+                font-size: 24px !important;
+            }
+
+            .artisan-sidebar .sidebar-brand {
+                padding-top: 80px !important;
+                padding-right: 20px !important;
+            }
+
+            #artisanAvatarView {
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .profile-grid,
+            .security-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+
+            .form-group-full {
+                grid-column: span 1 !important;
+            }
+
+            .gallery-upload-zone {
+                padding: 35px 20px !important;
+            }
+        }
+
+        /* --- ARTISAN GALLERY PREVIEW --- */
+        .gallery-upload-zone {
+            border: 3px dashed rgba(255, 63, 0, 0.2);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-base);
+            background: rgba(255, 63, 0, 0.02);
+        }
+
+        .gallery-upload-zone:hover {
+            border-color: var(--primary-orange);
+            background: rgba(255, 63, 0, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .gallery-preview-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            height: 150px;
+            box-shadow: var(--shadow-premium);
+            border: 2px solid var(--border-color);
+        }
+
+        .gallery-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 5px 10px rgba(239, 68, 68, 0.3);
+            transition: 0.2s;
+        }
+
+        .remove-img:hover {
+            transform: scale(1.1);
+            background: #dc2626;
+        }
+
+        /* --- QUICK UPLOAD BUTTON --- */
+        .quick-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary-orange), #CC3D00);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition-base);
+            box-shadow: 0 8px 25px rgba(255, 63, 0, 0.35);
+            white-space: nowrap;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .quick-upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 35px rgba(255, 63, 0, 0.5);
+        }
+
+        .quick-upload-btn i {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- SHARE FAB --- */
+        .share-fab {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 22px;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition-base);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .share-fab:hover {
+            background: rgba(255, 63, 0, 0.15);
+            border-color: rgba(255, 63, 0, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(255, 63, 0, 0.25);
+        }
+
+        .share-fab i {
+            width: 20px;
+            height: 20px;
+            color: var(--primary-orange);
+        }
+
+        /* --- QUICK UPLOAD MODAL --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .upload-modal {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 36px;
+            padding: 45px;
+            width: 100%;
+            max-width: 640px;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 63, 0, 0.05);
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-backdrop.open .upload-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-upload-zone {
+            border: 2px dashed rgba(255, 63, 0, 0.25);
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-base);
+            background: rgba(255, 63, 0, 0.02);
+            margin-top: 10px;
+        }
+
+        .modal-upload-zone:hover {
+            border-color: var(--primary-orange);
+            background: rgba(255, 63, 0, 0.06);
+            transform: translateY(-3px);
+        }
+
+        .modal-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .modal-preview-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 120px;
+            border: 2px solid var(--border-color);
+        }
+
+        .modal-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-preview-item .remove-img {
+            top: 7px;
+            right: 7px;
+            width: 26px;
+            height: 26px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toastContainer {
+            position: fixed;
+            bottom: 30px;
+            right: calc(var(--sidebar-width) + 30px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .toast-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 22px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+            font-family: 'Tajawal', sans-serif;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-width: 260px;
+            max-width: 380px;
+            animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .toast-item.toast-out {
+            animation: toastOut 0.35s ease forwards;
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .toast-info .toast-icon {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .toast-error .toast-icon {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+
+        /* --- MOBILE RESPONSIVE ADDITIONS --- */
+        @media (max-width: 768px) {
+            .share-fab {
+                bottom: 20px;
+                left: 20px;
+                padding: 13px 18px;
+                font-size: 14px;
+                border-radius: 18px;
+            }
+
+            .share-fab .fab-label {
+                display: none;
+            }
+
+            .share-fab {
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .upload-modal {
+                padding: 28px 22px;
+                border-radius: 28px;
+            }
+
+            .modal-close-btn {
+                top: 14px;
+                left: 14px;
+            }
+
+            .portfolio-section-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 16px !important;
+            }
+
+            .quick-upload-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #toastContainer {
+                right: 15px;
+                bottom: 90px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .reviews-header-premium {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                margin-bottom: 30px !important;
+            }
+
+            .reviews-header-premium h2 {
+                font-size: 28px !important;
+            }
+
+            #artisanReviewsList {
+                grid-template-columns: 1fr !important;
+            }
+
+            .rating-badge-premium {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <script src="footer.js" defer></script>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body style="margin: 0; padding: 0;">
+    <div id="toastContainer"></div>
+
+    <!-- Share My Profile FAB -->
+    <button class="share-fab" id="shareProfileFab" onclick="shareMyProfile()" title="مشاركة الملف الشخصي">
+        <i data-lucide="share-2"></i>
+        <span class="fab-label">مشاركة الملفي</span>
+    </button>
+
+    <!-- Quick Upload Modal -->
+    <div class="modal-backdrop" id="quickUploadModal" onclick="handleModalBackdropClick(event)">
+        <div class="upload-modal">
+            <button class="modal-close-btn" onclick="closeQuickUploadModal()">&times;</button>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div
+                    style="width: 60px; height: 60px; background: rgba(255,63,0,0.1); border: 1px solid rgba(255,63,0,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i data-lucide="image-plus" style="width: 28px; height: 28px; color: var(--primary-orange);"></i>
+                </div>
+                <h3 style="font-weight: 950; font-size: 26px; margin-bottom: 6px;">إضافة عمل جديد</h3>
+                <p style="color: var(--text-muted); font-weight: 700; font-size: 15px;">شارك أحدث أعمالك مع الزبائن
+                    لتعريف زبائن جدد بخدماتك</p>
+            </div>
+
+            <div>
+                <label class="form-label" style="margin-bottom: 8px;">عنوان العمل</label>
+                <input type="text" class="premium-input" id="uploadWorkTitle"
+                    placeholder="مثال: تركيب كهرباء شقة في الحي الجديد" style="margin-top: 0;">
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label class="form-label" style="margin-bottom: 8px;">وصف العمل (اختياري)</label>
+                <textarea class="premium-input" id="uploadWorkDesc" rows="3"
+                    placeholder="اوصف تفاصيل الخدمة التي قدمتها..."
+                    style="height: auto; padding: 16px 20px; margin-top: 0;"></textarea>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label class="form-label" style="margin-bottom: 8px;">صور العمل</label>
+                <div class="modal-upload-zone" onclick="document.getElementById('modalImgInput').click()">
+                    <i data-lucide="upload-cloud"
+                        style="width: 40px; height: 40px; margin-bottom: 10px; color: var(--primary-orange);"></i>
+                    <p style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">اسحب الصور هنا أو اضغط للاختيار
+                    </p>
+                    <p style="font-size: 13px; color: var(--text-muted); font-weight: 700;">PNG، JPG حتى 10MB</p>
+                    <input type="file" id="modalImgInput" hidden multiple accept="image/*"
+                        onchange="handleModalImgUpload(event)">
+                </div>
+                <p id="modalImageLimit" style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin: 8px 4px 0;">الصور المتبقية في المعرض: 3 من 3</p>
+                <div class="modal-preview-grid" id="modalPreviewGrid"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                <button class="btn-premium btn-outline-premium" onclick="closeQuickUploadModal()"
+                    style="height: 58px; border-radius: 18px;">إلغاء</button>
+                <button class="btn-premium btn-indigo" onclick="submitQuickUpload()" id="modalSubmitBtn"
+                    style="height: 58px; border-radius: 18px;">
+                    <i data-lucide="upload" style="width: 18px;"></i> نشر العمل
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Toggle -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="dashboard-body-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="artisan-sidebar">
+            <div class="sidebar-brand" style="padding: 30px 25px; margin-bottom: 20px;">
+                <a href="index.html" class="logo" style="text-decoration: none; color: #FF3F00; display: flex; align-items: center; gap: 12px; direction: ltr; font-weight: 950; font-size: 28px;">
+                    <img src="logo1.png" alt="lharfa.ma Logo" style="height: 40px; width: auto; border-radius: 8px;">
+                    <span>lharfa<span style="color: white;">.ma</span></span>
+                </a>
+            </div>
+
+            <nav class="nav-list-premium">
+                <div class="nav-link-premium active" onclick="switchDashboardTab('overview', this)">
+                    <i data-lucide="layout-grid"></i> <span data-i18n="dashboard_overview">الرئيسية</span>
+                </div>
+                <div class="nav-link-premium" onclick="switchDashboardTab('messages', this)">
+                    <i data-lucide="message-circle"></i> <span data-i18n="dashboard_messages">الرسائل</span>
+                </div>
+                <div class="nav-link-premium" onclick="switchDashboardTab('subscription', this)">
+                    <i data-lucide="zap"></i> <span data-i18n="dashboard_upgrade">ترقية الحساب</span>
+                </div>
+                <div class="nav-link-premium" onclick="switchDashboardTab('reviews', this)">
+                    <i data-lucide="star"></i> <span data-i18n="reviews">التقييمات</span>
+                </div>
+                <div class="nav-link-premium" onclick="switchDashboardTab('profile', this)">
+                    <i data-lucide="user"></i> <span data-i18n="dashboard_profile">معلوماتك الشخصية</span>
+                </div>
+                <div class="nav-link-premium" onclick="window.location.href='shop.html'">
+                    <i data-lucide="shopping-bag"></i> <span data-i18n="artisan_shop">متجر المعدات</span>
+                </div>
+                <div class="nav-link-premium" onclick="window.location.href='artisan-profile.html?id=me'"
+                    style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 20px;">
+                    <i data-lucide="external-link"></i> <span data-i18n="view_public_profile">معاينة الملف العام</span>
+                </div>
+            </nav>
+
+            <div style="padding: 20px 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                <div class="nav-link-premium" style="color: #ef4444;" onclick="logout()">
+                    <i data-lucide="log-out"></i> <span data-i18n="logout">خروج</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="artisan-main">
+            <!-- Overview Tab -->
+            <section id="tab-overview" class="tab-section active">
+                <div class="hero-banner-premium" style="background: linear-gradient(135deg, #020617 0%, #0F172A 100%);">
+                    <div class="hero-banner-content"
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap-reverse; gap: 40px;">
+                        <!-- Status Section on the Left (based on screenshot) -->
+                        <div class="status-container">
+                            <p style="font-size: 16px; font-weight: 950; margin-bottom: 5px; color: white;"
+                                data-i18n="is_working_now">واش خدام دابا؟</p>
+                            <div class="toggle-switch" id="artisanStatusToggle" onclick="handleStatusToggle()"
+                                style="box-shadow: 0 0 20px rgba(255, 63, 0, 0.4);">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                            <span id="statusBadgeLarge" class="status-badge"
+                                style="font-size: 14px; font-weight: 950; padding: 10px 20px; border-radius: 50px; background: rgba(148, 163, 184, 0.12); color: #94A3B8; border: 1px solid rgba(148, 163, 184, 0.2);">الحالة غير محددة</span>
+                        </div>
+
+                        <!-- Welcome Message on the Right -->
+                        <div class="hero-welcome-message" style="text-align: right; flex: 1;">
+                            <h1 style="font-size: 55px; font-weight: 950; margin-bottom: 15px; ">
+                                <span data-i18n="welcome_back">مرحباً بعودتك</span>، <span id="artisanName"
+                                    class="text-orange"
+                                    style="background: linear-gradient(135deg, #FF3F00 0%, #FFB800 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></span>
+                                👋
+                            </h1>
+                            <p style="font-size: 24px; opacity: 0.9; font-weight: 800; line-height: 1.5;">
+                                <span>تابع رسائلك وآخر نشاطك من هنا.</span>
+                                <span id="artisanCityDisplay" style="color: var(--primary-orange);"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-grid-premium">
+                    <div class="stat-card-v3" style="border-bottom: 4px solid #3B82F6;">
+                        <div class="stat-icon-v3"
+                            style="background: rgba(59, 130, 246, 0.1); color: #3B82F6; order: 2;">
+                            <i data-lucide="messages-square"></i>
+                        </div>
+                        <div style="text-align: right; order: 1;">
+                            <p style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 5px;">محادثات مباشرة</p>
+                            <h3 style="font-size: 36px; font-weight: 950; color: white;" id="statConversations">--</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card-v3" style="border-bottom: 4px solid #10B981;">
+                        <div class="stat-icon-v3"
+                            style="background: rgba(16, 185, 129, 0.1); color: #10B981; order: 2;">
+                            <i data-lucide="mail"></i>
+                        </div>
+                        <div style="text-align: right; order: 1;">
+                            <p style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 5px;">رسائل مستلمة</p>
+                            <h3 style="font-size: 36px; font-weight: 950; color: white;" id="statReceivedMessages">--</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card-v3" style="border-bottom: 4px solid #F59E0B;">
+                        <div class="stat-icon-v3"
+                            style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; order: 2;">
+                            <i data-lucide="star"></i>
+                        </div>
+                        <div style="text-align: right; order: 1;">
+                            <p style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 5px;"
+                                data-i18n="customer_rating">تقييم الزبناء</p>
+                            <h3 style="font-size: 36px; font-weight: 950; color: white;" id="statCustomerRating">--</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card-v3" style="border-bottom: 4px solid #8B5CF6;">
+                        <div class="stat-icon-v3"
+                            style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6; order: 2;">
+                            <i data-lucide="eye"></i>
+                        </div>
+                        <div style="text-align: right; order: 1;">
+                            <p style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 5px;"
+                                data-i18n="analytics">حصيلة الزيارات</p>
+                            <h3 style="font-size: 36px; font-weight: 950; color: white;" id="statProfileViews">--</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latest Messages -->
+                <div style="margin-top: 50px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h3 style="font-weight: 950; font-size: 26px; color: white;" data-i18n="latest_messages">أحدث الرسائل 💬</h3>
+                        <a href="#" style="color: var(--primary-orange); font-weight: 950; text-decoration: none;"
+                            onclick="switchDashboardTab('messages')" data-i18n="view_all">عرض الكل</a>
+                    </div>
+                    <div id="latestMessages" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                        <!-- Messages injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Messages Tab -->
+            <section id="tab-messages" class="tab-section">
+                <div class="premium-messenger glass-card-v3" style="padding: 0;">
+                    <div class="ms-sidebar"
+                        style="background: rgba(15, 23, 42, 0.4); border-inline-end: 1px solid var(--border-color); display: flex; flex-direction: column;">
+                        <div style="padding: 30px; border-bottom: 1px solid var(--border-color);">
+                            <h3 style="font-weight: 950; margin: 0;" data-i18n="messages_title">الرسائل 💬</h3>
+                        </div>
+                        <div id="artisanChatList" style="flex: 1; overflow-y: auto;">
+                            <!-- Chats injected by JS -->
+                        </div>
+                    </div>
+                    <div class="ms-chat"
+                        style="display: flex; flex-direction: column; background: transparent; position: relative;">
+                        <div id="chatHeader"
+                            style="padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); gap: 15px; flex-wrap: nowrap;">
+                            <div style="display: flex; align-items: center; flex: 1; min-width: 0; justify-content: flex-end; gap: 12px;">
+                                <div style="text-align: right; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                                    <h4 id="chatName"
+                                        style="font-weight: 950; font-size: 16px; margin: 0; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        -</h4>
+                                    <p
+                                        style="font-size: 11px; color: var(--success-green); font-weight: 900; margin: 2px 0 0 0; opacity: 0.85; display: flex; align-items: center; gap: 4px; justify-content: flex-end;">
+                                        <span style="width: 6px; height: 6px; background: #94A3B8; border-radius: 50%;"></span>
+                                        <span>حالة الاتصال غير متاحة</span></p>
+                                </div>
+                                <div style="position: relative; flex-shrink: 0;">
+                                    <img src="" id="chatAvatar"
+                                        style="width: 44px; height: 44px; border-radius: 14px; object-fit: cover; border: 2px solid var(--primary-orange); box-shadow: 0 4px 12px rgba(255, 63, 0, 0.15);">
+                                    <span
+                                        style="position: absolute; bottom: -3px; left: -3px; width: 12px; height: 12px; background: #94A3B8; border: 2.5px solid #0F172A; border-radius: 50%;"></span>
+                                </div>
+                                <button class="mobile-back-btn"
+                                    style="display: none; background: transparent; border: none; color: white; width: 35px; height: 35px; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;"
+                                    onclick="closeMobileChat()">
+                                    <i data-lucide="chevron-right" style="width: 24px; height: 24px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="chatBody"
+                            style="flex: 1; padding: 35px; overflow-y: auto; background: transparent; display: flex; flex-direction: column; gap: 20px;">
+                            <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.3; text-align: center;">
+                                <i data-lucide="message-circle" style="width: 80px; height: 80px; margin-bottom: 20px;"></i>
+                                <h3 style="font-weight: 950; margin: 0;">اختر محادثة للبدء</h3>
+                                <p style="font-weight: 700; font-size: 14px;">تواصل مع زبنائك بضغطة زر</p>
+                            </div>
+                        </div>
+                        <div
+                            style="padding: 18px 25px; border-top: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); display: flex; gap: 12px; align-items: center; flex-wrap: nowrap;">
+                            <button class="btn-premium btn-indigo"
+                                style="width: 54px; height: 54px; min-width: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; box-shadow: 0 8px 20px rgba(255, 63, 0, 0.25);"
+                                onclick="sendChatMessage()">
+                                <i data-lucide="send-horizontal" style="width: 22px; height: 22px;"></i>
+                            </button>
+                            <input type="text" class="premium-input" id="chatMsgInput" placeholder="اكتب رسالة..."
+                                data-i18n-placeholder="write_message_placeholder"
+                                style="flex: 1; height: 54px; font-size: 15px; margin-top: 0; padding: 0 18px; border-radius: 14px; font-family: 'Tajawal', sans-serif; font-weight: 600;"
+                                onkeyup="if(event.key==='Enter') sendChatMessage()">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subscription Tab -->
+            <section id="tab-subscription" class="tab-section">
+                <div style="text-align: center; margin-bottom: 60px;">
+                    <h2
+                        style="font-weight: 950; font-size: 42px; margin-bottom: 15px; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                        الاشتراكات</h2>
+                    <p
+                        style="color: var(--text-muted); font-size: 18px; max-width: 600px; margin: 0 auto; font-weight: 700;">
+                        ستظهر تفاصيل الباقات بعد ربط بيانات الاشتراك والدفع.</p>
+                </div>
+
+                <div class="glass-card-v3" style="max-width: 720px; margin: 0 auto; padding: 40px; text-align: center;">
+                    <i data-lucide="database" style="width: 38px; height: 38px; color: var(--primary-orange);"></i>
+                    <p style="margin-top: 15px; color: var(--text-muted); font-weight: 800;">لا توجد بيانات باقات أو أسعار متاحة حالياً.</p>
+                </div>
+            </section>
+
+            <!-- Reviews Tab -->
+            <section id="tab-reviews" class="tab-section">
+                <div class="reviews-header-premium"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 45px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h2 style="font-weight: 950; font-size: 34px; margin-bottom: 8px;" data-i18n="reviews">ماذا يقول
+                            الزبناء؟</h2>
+                        <p style="color: var(--text-muted); font-weight: 800; font-size: 15px;">آراء حقيقية من أشخاص
+                            تعاملت معهم</p>
+                    </div>
+                    <div class="rating-badge-premium" id="artisanRatingSummary" hidden
+                        style="display: flex; align-items: center; gap: 15px; background: rgba(245, 158, 11, 0.08); padding: 12px 25px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.15); box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                        <div style="display: flex; color: #F59E0B; gap: 4px;">
+                            <i data-lucide="star" style="fill: #F59E0B; width: 18px;"></i>
+                        </div>
+                        <span style="font-weight: 950; font-size: 22px; color: #F59E0B;" id="artisanRatingSummaryValue">--</span>
+                    </div>
+                </div>
+                <div id="artisanReviewsList"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 25px;">
+                    <!-- Reviews injected by JS -->
+                </div>
+            </section>
+
+            <!-- Profile Tab -->
+            <section id="tab-profile" class="tab-section">
+                <div class="glass-card-v3" style="padding: 40px;">
+                    <div class="profile-header-mobile"
+                        style="display: flex; gap: 30px; align-items: center; margin-bottom: 40px; flex-wrap: wrap;">
+                        <div style="position: relative;">
+                            <div
+                                style="width: 120px; height: 120px; border-radius: 35px; background: linear-gradient(135deg, #1E293B, #0F172A); display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.05); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                <img id="artisanAvatarView"
+                                    src="logo1.png"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <label for="pAvatar"
+                                style="position: absolute; bottom: -5px; right: -5px; width: 35px; height: 35px; background: var(--primary-orange); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #0B1120; box-shadow: 0 5px 15px rgba(255, 63, 0, 0.4);"
+                                class="hover-scale">
+                                <i data-lucide="camera" style="width: 16px;"></i>
+                                <input type="file" id="pAvatar" hidden accept="image/*"
+                                    onchange="uploadArtisanAvatar(event)">
+                            </label>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <h2 style="font-weight: 950; font-size: 28px; margin-bottom: 8px; color: white;"
+                                id="pNameView">غير متاح</h2>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div id="artisanVerifiedBadge"
+                                    style="display: none; background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 6px 15px; border-radius: 10px; font-weight: 900; font-size: 12px; align-items: center; gap: 5px; border: 1px solid rgba(16, 185, 129, 0.1);">
+                                    <i data-lucide="shield-check" style="width: 14px;"></i> <span id="artisanVerifiedLabel"
+                                        data-i18n="verified_account">حساب موثق</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="full_name">الاسم الكامل</label>
+                            <input type="text" class="premium-input" id="pNameInput" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="specialty">التخصص المهني</label>
+                            <select class="premium-input" id="pSpecialty">
+                                <option value="" selected>اختر التخصص</option>
+                                <option value="electricity" data-i18n="electricity">الكهرباء</option>
+                                <option value="plumbing" data-i18n="plumbing">السباكة</option>
+                                <option value="carpentry" data-i18n="carpentry">النجارة</option>
+                                <option value="painting" data-i18n="painting">الصباغة</option>
+                                <option value="masonry" data-i18n="masonry">البناء</option>
+                                <option value="ac" data-i18n="ac">التكييف</option>
+                                <option value="transport" data-i18n="transport">النقل</option>
+                                <option value="appliances" data-i18n="appliances">إلكترومنزلي</option>
+                                <option value="cleaning" data-i18n="cleaning">التنظيف</option>
+                                <option value="aluminum" data-i18n="aluminum">الألمنيوم</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="city">المدينة</label>
+                            <select class="premium-input" id="pCity">
+                                <option value="" selected>اختر المدينة</option>
+                                <option value="marrakech" data-i18n="marrakech">مراكش</option>
+                                <option value="taroudant" data-i18n="taroudant">تارودانت</option>
+                                <option value="agadir">أكادير</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="years_exp">سنوات الخبرة</label>
+                            <input type="number" class="premium-input" id="pExpInput" min="0" value="">
+                        </div>
+                        <div class="form-group form-group-full" style="grid-column: span 2;">
+                            <label class="form-label" data-i18n="p_bio">النبذة المهنية (Bio)</label>
+                            <textarea class="premium-input" id="pBioInput" rows="4" style="height: auto; padding: 20px;"
+                                placeholder="تحدث عن خبرتك ومهاراتك للزبائن..."></textarea>
+                        </div>
+                        <div class="form-group form-group-full" style="grid-column: span 2;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <label class="form-label" style="margin-bottom: 0;">معرض الأعمال (Portfolio)</label>
+                                <span id="galleryImageCount" style="font-size: 12px; color: var(--text-muted); font-weight: 800;">0 / 3 صور</span>
+                                <button class="btn-premium"
+                                    style="padding: 6px 15px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white;"
+                                    onclick="openQuickUploadModal()">
+                                    <i data-lucide="plus-circle" style="width: 14px;"></i> <span
+                                        data-i18n="add_work">رفع عمل جديد</span>
+                                </button>
+                            </div>
+                            <div class="gallery-upload-zone" id="galleryZone"
+                                onclick="document.getElementById('pGalleryInput').click()" style="padding: 40px 20px;">
+                                <i data-lucide="image-plus"
+                                    style="width: 40px; height: 40px; margin-bottom: 12px; color: var(--primary-orange);"></i>
+                                <p style="font-weight: 800; font-size: 14px; color: white;" data-i18n="add_images_desc">
+                                    اضغط لإضافة صور لأعمالك السابقة لإقناع الزبائن</p>
+                                <input type="file" id="pGalleryInput" hidden multiple accept="image/*"
+                                    onchange="handleGalleryUpload(event)">
+                            </div>
+                            <div id="pGalleryPreview"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px;">
+                            </div>
+                        </div>
+
+                        <div class="form-group-full" style="grid-column: span 2; padding-top: 20px;">
+                            <button class="btn-premium btn-indigo" onclick="saveArtisanProfile(this)"
+                                data-i18n="save_changes"
+                                style="width: 100%; height: 60px; font-size: 16px; border-radius: 18px;">
+                                <i data-lucide="save"></i> حفظ التغييرات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Section -->
+                <div class="glass-card-v3" style="margin-top: 30px; padding: 35px;">
+                    <h3 style="font-weight: 950; font-size: 22px; margin-bottom: 25px; color: white;"
+                        data-i18n="account_security">أمان الحساب</h3>
+                    <div class="security-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="new_password">كلمة مرور جديدة</label>
+                            <input type="password" class="premium-input" id="newPassInput" placeholder="********">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="confirm_new_password">تأكيد كلمة المرور</label>
+                            <input type="password" class="premium-input" id="confirmPassInput" placeholder="********">
+                        </div>
+                        <div class="form-group-full" style="grid-column: span 2;">
+                            <button class="btn-premium btn-outline-premium"
+                                style="width: 100%; height: 55px; font-weight: 800; border-radius: 15px;"
+                                onclick="updatePassword()">تحديث كلمة المرور</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const artisanDashboardData = { chats: [], messages: [], reviews: [], user: null, artisan: null };
+
+        async function loadArtisanDashboardData() {
+            if (!window.api) return artisanDashboardData;
+            if (window.DashboardManager?.isDemoMode || window.api?.backendConfigured === false) {
+                artisanDashboardData.user = DashboardManager.user;
+                updateArtisanStats();
+                return artisanDashboardData;
+            }
+            const current = await api.getCurrentUser();
+            if (!current.success || !current.user) {
+                window.location.href = 'login.html';
+                return artisanDashboardData;
+            }
+            if (current.user.role !== 'artisan') {
+                const dashboard = current.user.role === 'client' ? 'client-dashboard.html' : 'admin-dashboard.html';
+                window.location.replace(dashboard);
+                return artisanDashboardData;
+            }
+            artisanDashboardData.user = current.user;
+            const artisanRes = await api.getArtisanById('me');
+            artisanDashboardData.artisan = artisanRes.success ? artisanRes.data : null;
+            const artisanId = artisanDashboardData.artisan?.id;
+            const [messagesRes, reviewsRes] = await Promise.all([
+                api.getMessages(),
+                artisanId ? api.getReviews(artisanId) : Promise.resolve({ success: true, data: [] })
+            ]);
+            artisanDashboardData.messages = messagesRes.success ? (messagesRes.data || []) : [];
+            artisanDashboardData.reviews = reviewsRes.success ? (reviewsRes.data || []) : [];
+            artisanDashboardData.chats = [];
+            updateArtisanStats();
+            return artisanDashboardData;
+        }
+
+        function updateArtisanStats() {
+            const conversationsEl = document.getElementById('statConversations');
+            const receivedEl = document.getElementById('statReceivedMessages');
+            const ratingEl = document.getElementById('statCustomerRating');
+            const viewsEl = document.getElementById('statProfileViews');
+            const ratingSummary = document.getElementById('artisanRatingSummary');
+            if (window.DashboardManager?.isDemoMode || window.api?.backendConfigured === false) {
+                [conversationsEl, receivedEl, ratingEl, viewsEl].forEach(element => { if (element) element.textContent = '--'; });
+                if (ratingSummary) ratingSummary.style.display = 'none';
+                return;
+            }
+
+            const artisanId = String(artisanDashboardData.user?.id || '');
+            const conversations = new Set(artisanDashboardData.messages.map((message) => {
+                const senderId = String(message.sender_id || message.senderId || '');
+                const receiverId = String(message.receiver_id || message.receiverId || '');
+                return senderId === artisanId ? receiverId : senderId;
+            }).filter(Boolean));
+            const receivedMessages = artisanDashboardData.messages.filter((message) => String(message.receiver_id || message.receiverId || '') === artisanId).length;
+            const rating = artisanDashboardData.reviews.length
+                ? (artisanDashboardData.reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / artisanDashboardData.reviews.length).toFixed(1)
+                : '--';
+            if (conversationsEl) conversationsEl.textContent = String(conversations.size).padStart(2, '0');
+            if (receivedEl) receivedEl.textContent = String(receivedMessages).padStart(2, '0');
+            if (ratingEl) ratingEl.textContent = rating;
+            if (viewsEl) viewsEl.textContent = '--';
+            if (ratingSummary) {
+                ratingSummary.style.display = artisanDashboardData.reviews.length ? 'flex' : 'none';
+                document.getElementById('artisanRatingSummaryValue').textContent = rating === '--' ? '--' : `${rating} / 5`;
+            }
+        }
+
+        function t(key) {
+            return (window.I18nManager && window.I18nManager.getString(key)) || key;
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.artisan-sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function switchDashboardTab(tabId, el) {
+            const sidebar = document.querySelector('.artisan-sidebar');
+            if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) toggleSidebar();
+
+            document.querySelectorAll('.nav-link-premium').forEach(l => l.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            document.querySelectorAll('.tab-section').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.add('active');
+
+            if (tabId === 'overview') renderOverview();
+            if (tabId === 'messages') renderArtisanChats();
+            if (tabId === 'subscription') { if (window.lucide) lucide.createIcons(); }
+            if (tabId === 'reviews') renderReviews();
+            if (tabId === 'profile') loadArtisanProfile();
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function handleSubscriptionUpgrade() {
+            if (window.DashboardManager) {
+                DashboardManager.showToast('جاري تحويلك لبوابة الدفع...', 'info');
+                setTimeout(() => {
+                    alert('هذه ميزة تجريبية. سيتم ربط بوابة الدفع قريباً.');
+                }, 1500);
+            } else {
+                alert('جاري تحويلك لبوابة الدفع...');
+            }
+        }
+
+        function handleCurrentPlan() {
+            showCustomToast('هذه معاينة للباقة الحالية. إدارة الاشتراك تتطلب ربط قاعدة البيانات.', 'info', 'info');
+        }
+
+        function renderOverview() {
+            renderOverviewMessages();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function renderOverviewMessages() {
+            const list = document.getElementById('latestMessages');
+            if (!list) return;
+
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const artisanId = String(currentUser.id || '1');
+            const allMessages = window.api ? ((await api.getMessages()).data || []) : [];
+            
+            const threads = {};
+            allMessages.forEach(m => {
+                const senderId = String(m.senderId || m.sender_id || '');
+                const receiverId = String(m.receiverId || m.receiver_id || '');
+                if (senderId !== artisanId && receiverId !== artisanId) return;
+                const clientId = senderId === artisanId ? receiverId : senderId;
+                if (!threads[clientId] || new Date(m.timestamp || m.created_at) > new Date(threads[clientId].timestamp)) {
+                    threads[clientId] = {
+                        id: clientId,
+                        name: senderId === artisanId ? (m.receiverName || m.receiver_name || 'زبون') : (m.senderName || m.sender_name || 'زبون'),
+                        msg: m.content,
+                        timestamp: m.timestamp || m.created_at,
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(m.senderName || m.sender_name || 'A')}&background=random&color=fff`
+                    };
+                }
+            });
+
+            const recent = Object.values(threads).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 3);
+            
+            list.innerHTML = recent.map(chat => `
+                <div class="glass-card-v3" style="padding: 20px; display: flex; gap: 15px; align-items: center; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.03);" onclick="openAndGoToChat('${chat.id}', true)">
+                    <div style="flex: 1; text-align: right;">
+                        <h5 style="margin: 0; font-weight: 950; color: white; font-size: 15px;">${chat.name}</h5>
+                        <p style="margin: 5px 0 0; font-size: 12px; color: var(--text-muted); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">${chat.msg}</p>
+                    </div>
+                    <img src="${chat.avatar}" style="width: 50px; height: 50px; border-radius: 14px; object-fit: cover;">
+                </div>
+            `).join('') || `
+                <div style="grid-column: 1/-1; padding: 40px; text-align: center; opacity: 0.5; font-weight: 800; border: 1px dashed rgba(255,255,255,0.1); border-radius: 20px;">
+                    لا توجد رسائل حديثة.
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openAndGoToChat(id, isReal) {
+            switchDashboardTab('messages');
+            setTimeout(() => {
+                openArtisanChat(id, isReal);
+            }, 100);
+        }
+
+        function handleStatusToggle() {
+            const toggle = document.getElementById('artisanStatusToggle');
+            const badge = document.getElementById('statusBadgeLarge');
+            toggle.classList.toggle('on');
+
+            if (toggle.classList.contains('on')) {
+                badge.style.background = 'rgba(16, 185, 129, 0.1)';
+                badge.style.color = '#10B981';
+                badge.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                badge.textContent = t('available_now') || '● خدام (متاح)';
+                if (window.DashboardManager) DashboardManager.showToast('availability_info_available', 'success');
+            } else {
+                badge.style.background = 'rgba(239, 68, 68, 0.1)';
+                badge.style.color = '#EF4444';
+                badge.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                badge.textContent = t('not_available_now') || '● مشغول حالياً';
+                if (window.DashboardManager) DashboardManager.showToast('not_available_now', 'info');
+            }
+        }
+
+        async function renderReviews() {
+            const list = document.getElementById('artisanReviewsList');
+            if (!list) return;
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const res = window.api ? await api.getReviews(currentUser.id) : { success: true, data: [] };
+            const reviews = res.success ? (res.data || []) : [];
+
+            list.innerHTML = reviews.map((rev) => {
+                const clientName = rev.client || rev.client_name || 'زبون';
+                const avatar = rev.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(clientName) + '&background=FF4500&color=fff';
+                const rating = Number(rev.rating);
+                const stars = Number.isFinite(rating) && rating > 0
+                    ? Array(Math.min(5, Math.floor(rating))).fill('<i data-lucide="star" style="width: 12px; fill: #F59E0B;"></i>').join('')
+                    : '';
+                return '<div class="glass-card-v3" style="padding: 30px; position: relative; overflow: hidden; transition: transform 0.4s ease;">'
+                    + '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative; z-index: 2;">'
+                    + '<div style="display: flex; gap: 15px; align-items: center;">'
+                    + '<img src="' + avatar + '" style="width: 55px; height: 55px; border-radius: 18px; object-fit: cover; border: 2px solid rgba(255,255,255,0.05);">'
+                    + '<div><h5 style="font-weight: 950; margin: 0; font-size: 17px; color: white;">' + clientName + '</h5>'
+                    + '<p style="font-size: 12px; color: var(--text-muted); font-weight: 800; margin-top: 2px;">' + (rev.created_at ? rev.created_at.slice(0, 10) : '') + '</p></div>'
+                    + '</div><div style="display: flex; gap: 2px; color: #F59E0B; background: rgba(245, 158, 11, 0.05); padding: 5px 10px; border-radius: 10px;">' + stars + '</div></div>'
+                    + '<p style="font-size: 16px; line-height: 1.7; color: white; opacity: 0.95; font-weight: 800; margin-bottom: 25px; position: relative; z-index: 2; font-style: italic;">"' + (rev.comment || '') + '"</p></div>';
+            }).join('') || '<div style="padding: 50px; text-align: center; opacity: 0.5; font-weight: 800;">لا توجد تقييمات حتى الآن.</div>';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function handleReviewReply(id) {
+            const reply = prompt("اكتب ردك للزبون:");
+            if (reply) {
+                showCustomToast('لم يتم إرسال الرد. ستتوفر هذه الوظيفة بعد ربط قاعدة البيانات.', 'info', 'info');
+            }
+        }
+
+        let activeChatSession = null;
+
+        /* ============================================================
+           MESSENGER SYSTEM REBORN (ARTISAN)
+           ============================================================ */
+        let activeChatId = null;
+        let isRealChat = false;
+
+        async function renderArtisanChats() {
+            const list = document.getElementById('artisanChatList');
+            if (!list) return;
+
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const artisanId = String(currentUser.id || '1');
+            
+            // 1. Get real messages and group by sender (client)
+            const allMessages = window.api ? ((await api.getMessages()).data || []) : [];
+            const artisanMessages = allMessages.filter((message) =>
+                String(message.senderId || message.sender_id || '') === artisanId
+                || String(message.receiverId || message.receiver_id || '') === artisanId
+            );
+            
+            const realThreads = {};
+            artisanMessages.forEach(m => {
+                const clientId = String((m.senderId || m.sender_id) === artisanId ? (m.receiverId || m.receiver_id) : (m.senderId || m.sender_id));
+                if (!realThreads[clientId] || new Date(m.timestamp || m.created_at) > new Date(realThreads[clientId].timestamp)) {
+                    realThreads[clientId] = {
+                        id: clientId,
+                        name: (m.senderId || m.sender_id) === artisanId ? (m.receiverName || m.receiver_name || 'زبون') : (m.senderName || m.sender_name),
+                        msg: m.content,
+                        time: new Date(m.timestamp || m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        timestamp: m.timestamp || m.created_at,
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(m.senderName || m.sender_name)}&background=random&color=fff`,
+                        online: m.online === true,
+                        isReal: true
+                    };
+                }
+            });
+
+            const realChats = Object.values(realThreads);
+            const combinedChats = [...realChats, ...artisanDashboardData.chats];
+
+            list.innerHTML = combinedChats.map((chat, idx) => `
+                <div class="chat-list-item ${activeChatId === String(chat.id) ? 'active' : ''}" 
+                     onclick="openArtisanChat('${chat.id}', ${chat.isReal || false})" 
+                     data-id="${chat.id}">
+                    <div style="flex: 1; text-align: right;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 10px; opacity: 0.6; font-weight: 800;">${chat.time}</span>
+                            <h5 style="font-weight: 950; font-size: 15px; margin: 0; color: white;">${chat.name}</h5>
+                        </div>
+                        <p style="font-size: 12px; opacity: 0.7; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; font-weight: 700;">${chat.msg}</p>
+                    </div>
+                    <div style="position: relative; flex-shrink: 0;">
+                        <img src="${chat.avatar}" style="width: 48px; height: 48px; border-radius: 15px; object-fit: cover;">
+                        ${chat.online ? '<span style="position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; background: #10B981; border: 2.5px solid #0F172A; border-radius: 50%;"></span>' : ''}
+                    </div>
+                </div>
+            `).join('') || '<div style="padding: 50px; text-align: center; opacity: 0.5; font-weight: 800;">لا توجد محادثات نشطة.</div>';
+
+            // REMOVED: Automatic openArtisanChat call to allow user to see the list first
+        }
+
+        async function openArtisanChat(id, isReal = false) {
+            activeChatId = String(id);
+            isRealChat = isReal;
+
+            const body = document.getElementById('chatBody');
+            
+            // UI Updates
+            document.querySelectorAll('.chat-list-item').forEach(item => {
+                item.classList.toggle('active', item.getAttribute('data-id') === activeChatId);
+            });
+
+            let chatInfo;
+            if (isReal) {
+                const allMessages = window.api ? ((await api.getMessages()).data || []) : [];
+                const thread = allMessages.filter(m => 
+                    (String(m.senderId || m.sender_id) === activeChatId && String(m.receiverId || m.receiver_id) === artisanId) ||
+                    (String(m.senderId || m.sender_id) === artisanId && String(m.receiverId || m.receiver_id) === activeChatId)
+                ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                if (thread.length > 0) {
+                    const firstMsg = thread.find(m => String(m.senderId || m.sender_id) === activeChatId);
+                    chatInfo = {
+                        name: firstMsg ? firstMsg.senderName : 'زبون',
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstMsg ? firstMsg.senderName : 'A')}&background=random&color=fff`
+                    };
+                    body.innerHTML = thread.map(m => `
+                        <div class="chat-bubble ${String(m.senderId || m.sender_id) === artisanId ? 'bubble-out' : 'bubble-in'}">
+                            ${m.content}
+                            <span class="chat-time">${new Date(m.timestamp || m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                    `).join('');
+                }
+            } else {
+                chatInfo = artisanDashboardData.chats.find(c => String(c.id) === activeChatId);
+                if (chatInfo) {
+                    body.innerHTML = `
+                        <div class="chat-bubble bubble-in">
+                            مرحباً يا معلم، واش ممكن تجي تشوف واحد المشكل فالمكينة ديال الصابون اليوم؟
+                            <span class="chat-time">10:15 AM</span>
+                        </div>
+                        <div class="chat-bubble bubble-out">
+                            أهلاً جلال، نعم أنا متوفر اليوم. ربع ساعة وأكون عندك في حي المحايطة.
+                            <span class="chat-time">10:17 AM</span>
+                        </div>
+                    `;
+                }
+            }
+
+            if (chatInfo) {
+                document.getElementById('chatName').textContent = chatInfo.name;
+                document.getElementById('chatAvatar').src = chatInfo.avatar;
+            }
+
+            if (window.innerWidth <= 1024) {
+                document.querySelector('.premium-messenger').classList.add('show-chat');
+            }
+            body.scrollTop = body.scrollHeight;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function sendChatMessage() {
+            const inp = document.getElementById('chatMsgInput');
+            const val = inp.value.trim();
+            if (!val || !activeChatId) return;
+
+            const currentUser = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const artisanId = String(currentUser.id || '1');
+            const body = document.getElementById('chatBody');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (isRealChat) {
+                const result = await api.addMessage({ receiver_id: activeChatId, content: val });
+                if (!result.success) {
+                    showCustomToast(result.message || 'تعذر إرسال الرسالة.', 'error', 'alert-circle');
+                    return;
+                }
+            } else {
+                showCustomToast('المراسلة متاحة بعد ربط قاعدة البيانات.', 'info', 'info');
+                return;
+            }
+
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble bubble-out';
+            bubble.textContent = val;
+            const timeLabel = document.createElement('span');
+            timeLabel.className = 'chat-time';
+            timeLabel.textContent = time;
+            bubble.appendChild(timeLabel);
+            body.appendChild(bubble);
+            inp.value = '';
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function closeMobileChat() {
+            document.querySelector('.premium-messenger').classList.remove('show-chat');
+        }
+
+        function loadArtisanProfile() {
+            let user = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            if (window.DashboardManager?.isDemoMode) {
+                user = DashboardManager.user?.role === 'artisan' ? DashboardManager.user : {};
+            }
+            document.getElementById('artisanName').textContent = user.name || 'غير متاح';
+            document.getElementById('artisanCityDisplay').textContent = user.city ? `فـ ${t(user.city) || user.city}` : '';
+            updateArtisanStats();
+            document.getElementById('pNameView').textContent = user.name || 'غير متاح';
+            document.getElementById('pNameInput').value = user.name || '';
+            const specialtySelect = document.getElementById('pSpecialty');
+            const availableSpecialty = Array.from(specialtySelect.options).some(option => option.value === user.specialty);
+            specialtySelect.value = availableSpecialty ? user.specialty : '';
+            const citySelect = document.getElementById('pCity');
+            const availableCity = Array.from(citySelect.options).some(option => option.value === user.city);
+            citySelect.value = availableCity ? user.city : '';
+            document.getElementById('pExpInput').value = user.experience ?? '';
+            document.getElementById('pBioInput').value = user.bio || '';
+
+            const verifiedBadge = document.getElementById('artisanVerifiedBadge');
+            if (verifiedBadge) verifiedBadge.style.display = user.verified === true ? 'flex' : 'none';
+
+            if (user.avatar) document.getElementById('artisanAvatarView').src = user.avatar;
+            if (user.gallery) renderGalleryPreview(user.gallery);
+        }
+
+        const MAX_PORTFOLIO_IMAGES = 3;
+        let tempGallery = [];
+
+        function updatePortfolioImageCount() {
+            const count = document.getElementById('galleryImageCount');
+            if (count) count.textContent = `${tempGallery.length} / ${MAX_PORTFOLIO_IMAGES} صور`;
+
+            const modalLimit = document.getElementById('modalImageLimit');
+            if (modalLimit) {
+                const remaining = Math.max(0, MAX_PORTFOLIO_IMAGES - tempGallery.length - modalImages.length);
+                modalLimit.textContent = `الصور المتبقية في المعرض: ${remaining} من ${MAX_PORTFOLIO_IMAGES}`;
+            }
+        }
+
+        function handleGalleryUpload(e) {
+            const files = Array.from(e.target.files || []);
+            e.target.value = '';
+            const remaining = MAX_PORTFOLIO_IMAGES - tempGallery.length;
+            if (files.length > remaining) showCustomToast('يمكنك إضافة 3 صور كحد أقصى إلى المعرض.', 'error', 'image');
+            files.slice(0, remaining).filter(file => file.type.startsWith('image/')).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (tempGallery.length >= MAX_PORTFOLIO_IMAGES) return;
+                    tempGallery.push(ev.target.result);
+                    renderGalleryPreview(tempGallery);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderGalleryPreview(imgs) {
+            const container = document.getElementById('pGalleryPreview');
+            const visibleImages = imgs.slice(0, MAX_PORTFOLIO_IMAGES);
+            container.innerHTML = visibleImages.map((img, idx) => `
+                <div class="gallery-preview-item">
+                    <img src="${img}">
+                    <button class="remove-img" onclick="removeGalleryImg(${idx})">&times;</button>
+                </div>
+            `).join('');
+            tempGallery = [...visibleImages];
+            updatePortfolioImageCount();
+        }
+
+        function removeGalleryImg(idx) {
+            tempGallery.splice(idx, 1);
+            renderGalleryPreview(tempGallery);
+        }
+
+        async function saveArtisanProfile(btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> ' + (t('saving') || 'جاري الحفظ...');
+            if (window.lucide) lucide.createIcons();
+
+            const user = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            user.name = document.getElementById('pNameInput').value;
+            user.specialty = document.getElementById('pSpecialty').value;
+            user.city = document.getElementById('pCity').value;
+            user.experience = document.getElementById('pExpInput').value;
+            user.bio = document.getElementById('pBioInput').value;
+            user.gallery = tempGallery;
+            user.role = 'artisan';
+
+            if (window.DashboardManager?.isDemoMode) {
+                localStorage.setItem('albane_user', JSON.stringify(user));
+                DashboardManager.user = user;
+                loadArtisanProfile();
+                btn.innerHTML = originalText;
+                if (window.lucide) lucide.createIcons();
+                showCustomToast('تم حفظ بيانات المعاينة على هذا الجهاز فقط.', 'info', 'save');
+                return;
+            }
+
+            const res = await api.updateProfile(user);
+            if (res.success) {
+                if (window.DashboardManager) DashboardManager.showToast('changes_saved_success', 'success');
+                loadArtisanProfile();
+            } else if (window.DashboardManager) {
+                DashboardManager.showToast(res.message || 'تعذر حفظ التغييرات.', 'error');
+            }
+            btn.innerHTML = originalText;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function updatePassword() {
+            const p1 = document.getElementById('newPassInput').value;
+            const p2 = document.getElementById('confirmPassInput').value;
+            if (!p1 || p1 !== p2) {
+                if (window.DashboardManager) DashboardManager.showToast('passwords_not_match', 'error');
+                return;
+            }
+            showCustomToast('تغيير كلمة المرور يتطلب ربط نظام تسجيل الدخول.', 'info', 'lock');
+        }
+
+        function uploadArtisanAvatar(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('artisanAvatarView').src = ev.target.result;
+                if (window.DashboardManager?.isDemoMode) {
+                    DashboardManager.user.avatar = ev.target.result;
+                    localStorage.setItem('albane_user', JSON.stringify(DashboardManager.user));
+                    showCustomToast('تم تحديث الصورة على هذا الجهاز فقط.', 'info', 'image');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function logout() {
+            if (window.showCustomToast) {
+                showCustomToast('جاري تسجيل الخروج... في أمان الله 👋', 'info', 'log-out');
+            }
+            setTimeout(() => {
+                if (window.DashboardManager) DashboardManager.logout();
+                else {
+                    localStorage.removeItem('albane_token');
+                    sessionStorage.removeItem('albane_token');
+                    localStorage.removeItem('albane_user');
+                    window.location.href = 'index.html';
+                }
+            }, 800);
+        }
+        /* ===== SHARE PROFILE ===== */
+        function shareMyProfile() {
+            const user = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            const username = (user.name || 'artisan').replace(/\s+/g, '-').toLowerCase();
+            const profileUrl = `lharfa.ma/${username}`;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(profileUrl).then(() => {
+                    showCustomToast(`تم نسخ الرابط: ${profileUrl}`, 'success', 'link');
+                }).catch(() => fallbackCopy(profileUrl));
+            } else {
+                fallbackCopy(profileUrl);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            el.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+            document.body.appendChild(el);
+            el.focus(); el.select();
+            try {
+                document.execCommand('copy');
+                showCustomToast(`تم نسخ الرابط: ${text}`, 'success', 'link');
+            } catch (e) {
+                showCustomToast('تعذر نسخ الرابط، حاول يدوياً', 'error', 'alert-circle');
+            }
+            document.body.removeChild(el);
+        }
+
+        /* ===== TOAST SYSTEM ===== */
+        function showCustomToast(message, type = 'success', icon = 'check-circle') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-item toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon"><i data-lucide="${icon}" style="width:18px;height:18px;"></i></div>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => {
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        /* ===== QUICK UPLOAD MODAL ===== */
+        let modalImages = [];
+
+        function openQuickUploadModal() {
+            document.getElementById('quickUploadModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            modalImages = [];
+            document.getElementById('modalImgInput').value = '';
+            document.getElementById('modalPreviewGrid').innerHTML = '';
+            document.getElementById('uploadWorkTitle').value = '';
+            document.getElementById('uploadWorkDesc').value = '';
+            updatePortfolioImageCount();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeQuickUploadModal() {
+            document.getElementById('quickUploadModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function handleModalBackdropClick(e) {
+            if (e.target === document.getElementById('quickUploadModal')) closeQuickUploadModal();
+        }
+
+        function handleModalImgUpload(e) {
+            const files = Array.from(e.target.files || []);
+            e.target.value = '';
+            const remaining = Math.max(0, MAX_PORTFOLIO_IMAGES - tempGallery.length - modalImages.length);
+            if (files.length > remaining) showCustomToast('يمكنك إضافة 3 صور كحد أقصى إلى المعرض.', 'error', 'image');
+            files.slice(0, remaining).filter(file => file.type.startsWith('image/')).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (tempGallery.length + modalImages.length >= MAX_PORTFOLIO_IMAGES) return;
+                    modalImages.push(ev.target.result);
+                    renderModalPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderModalPreview() {
+            const grid = document.getElementById('modalPreviewGrid');
+            grid.innerHTML = modalImages.map((img, idx) => `
+                <div class="modal-preview-item">
+                    <img src="${img}" alt="preview">
+                    <button class="remove-img" onclick="removeModalImg(${idx})">&times;</button>
+                </div>
+            `).join('');
+            updatePortfolioImageCount();
+        }
+
+        function removeModalImg(idx) {
+            modalImages.splice(idx, 1);
+            renderModalPreview();
+        }
+
+        function submitQuickUpload() {
+            const title = document.getElementById('uploadWorkTitle').value.trim();
+            if (!title) {
+                showCustomToast('يرجى إدخال عنوان للعمل', 'error', 'alert-circle');
+                return;
+            }
+            if (tempGallery.length + modalImages.length > MAX_PORTFOLIO_IMAGES) {
+                showCustomToast('يمكنك إضافة 3 صور كحد أقصى إلى المعرض.', 'error', 'image');
+                return;
+            }
+            const btn = document.getElementById('modalSubmitBtn');
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> جاري النشر...';
+            btn.disabled = true;
+            if (window.lucide) lucide.createIcons();
+
+            tempGallery = [...tempGallery, ...modalImages];
+
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="upload"></i> نشر العمل';
+                btn.disabled = false;
+                closeQuickUploadModal();
+                renderGalleryPreview(tempGallery);
+                showCustomToast('تم تحديث المعاينة. لن يتم حفظها قبل ربط قاعدة البيانات.', 'info', 'image');
+                if (window.lucide) lucide.createIcons();
+            }, 1200);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeQuickUploadModal();
+        });
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOverview();
+            loadArtisanProfile();
+            const user = JSON.parse(localStorage.getItem('albane_user') || '{}');
+            if (user.role === 'artisan') {
+                const eliteIcon = document.getElementById('sidebarEliteIcon');
+                if (eliteIcon) eliteIcon.style.display = 'block';
+            }
+            if (window.lucide) lucide.createIcons();
+            if (window.I18nManager) window.I18nManager.updateDOM();
+        });
+    </script>
+</body>
+
+</html>
